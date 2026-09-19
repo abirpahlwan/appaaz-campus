@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enterprise HR on Odoo — Pahlwan Rabiul Islam</title>
+<meta name="description" content="Connecting a React/Next.js HR app to Odoo ERP: role-based access, attendance and leave flows, upgrades and support.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Enterprise HR on Odoo">
+<meta property="og:description" content="Connecting a React/Next.js HR app to Odoo ERP: role-based access, attendance and leave flows, upgrades and support.">
+<link rel="stylesheet" href="blog.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="../">← The village</a>
+  <a href="./">All notes</a>
+  <span class="who">Pahlwan Rabiul Islam</span>
+</nav>
+
+<div class="wrap">
+<article>
+
+<h1>Enterprise HR on Odoo: roles, attendance and leave</h1>
+<p class="meta">HR App · <b>enterprise systems</b> · ~5 min read</p>
+
+<p class="standfirst">
+An HR app is not a form with a database behind it. It is roles, approvals and audit trails —
+and Odoo makes a solid backend if you treat it as one.
+</p>
+
+<p>
+At <strong>Metamorphosis Ltd</strong> (Apr 2025 — present) I build an HR app connected to
+<strong>Odoo as the backend</strong>: role-based login and access, attendance management and
+leave management, plus enterprise-level support and Odoo upgrades.
+</p>
+
+<h2>Roles first, screens second</h2>
+
+<p>
+Who can see whom, who approves what, and what happens when someone changes teams — those
+answers shape the data model before any UI gets drawn. Getting roles right early keeps every
+later feature (attendance, leave, reports) from turning into a special case.
+</p>
+
+<h2>Attendance and leave are state machines</h2>
+
+<p>
+Clock-ins, corrections, leave requests, approvals, balances: each one is a small workflow with
+its own states and transitions. Modelling them explicitly keeps the app predictable for HR
+staff and auditable for everyone else.
+</p>
+
+<h2>Upgrades and support are part of the product</h2>
+
+<p>
+Enterprise work doesn't end at launch. Odoo upgrades, customer support, and bridging business
+needs with engineering tasks are the ongoing half — along with coaching teammates on SDLC and
+engineering best practices so the whole team ships steadily.
+</p>
+
+</article>
+
+<div class="endnote">
+  <p>
+    I'm a Software Engineer at Metamorphosis Ltd, the leading Odoo Silver Partner from
+    Bangladesh. More of the work is <a href="../">in the village</a>.
+  </p>
+  <div class="nextprev">
+    <a href="balance-when-money-is-on-the-line.html">← Ludo Club at scale</a>
+    <a href="games-you-play-with-real-objects.html">Next: AR that has to work →</a>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

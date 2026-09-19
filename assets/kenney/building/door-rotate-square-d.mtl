@@ -1,0 +1,4 @@
+newmtl colormap
+Kd 0.6031 0.6176 0.6999
+newmtl glass
+Kd 0.8821 0.9321 1.0000

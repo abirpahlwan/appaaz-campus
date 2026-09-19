@@ -1,0 +1,4 @@
+newmtl wall_metal
+Kd 0.5196 0.5157 0.5000
+newmtl concrete
+Kd 0.4412 0.4294 0.3961

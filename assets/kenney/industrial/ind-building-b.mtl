@@ -1,0 +1,4 @@
+newmtl colormap
+Kd 1.0000 1.0000 1.0000
+newmtl colormap_specular
+Kd 1.0000 1.0000 1.0000

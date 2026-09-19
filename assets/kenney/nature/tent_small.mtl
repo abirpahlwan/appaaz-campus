@@ -1,0 +1,6 @@
+newmtl colorRed
+Kd 0.8784 0.2902 0.3137
+newmtl colorRedDark
+Kd 0.7569 0.2118 0.2314
+newmtl wood
+Kd 1.0000 0.5569 0.3843

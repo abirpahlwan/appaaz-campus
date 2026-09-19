@@ -1,0 +1,6 @@
+newmtl dirtDark
+Kd 0.7098 0.4078 0.2706
+newmtl grass
+Kd 0.1725 0.8471 0.7216
+newmtl dirt
+Kd 0.8863 0.5137 0.3412

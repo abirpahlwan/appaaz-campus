@@ -1,0 +1,6 @@
+newmtl wall_metal
+Kd 0.5342 0.5263 0.5021
+newmtl wall
+Kd 0.5000 0.5000 0.5000
+newmtl roof
+Kd 0.4922 0.4851 0.4651

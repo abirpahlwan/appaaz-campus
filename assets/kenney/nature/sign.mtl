@@ -1,0 +1,6 @@
+newmtl wood
+Kd 1.0000 0.5569 0.3843
+newmtl woodDark
+Kd 0.7686 0.4275 0.2941
+newmtl _defaultMat
+Kd 1.0000 1.0000 1.0000

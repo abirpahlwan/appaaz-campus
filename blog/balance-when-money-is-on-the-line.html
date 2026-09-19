@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ludo Club at 5M+ daily players — Pahlwan Rabiul Islam</title>
+<meta name="description" content="Micro-services, real-time sync and live operations on a multiplayer dice game with 5M+ daily active users.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ludo Club at 5M+ daily players">
+<meta property="og:description" content="Micro-services, real-time sync and live operations on a multiplayer dice game with 5M+ daily active users.">
+<link rel="stylesheet" href="blog.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="../">← The village</a>
+  <a href="./">All notes</a>
+  <span class="who">Pahlwan Rabiul Islam</span>
+</nav>
+
+<div class="wrap">
+<article>
+
+<h1>Ludo Club at 5M+ daily players: what scale teaches you</h1>
+<p class="meta">Ludo Club · <b>multiplayer</b> · ~5 min read</p>
+
+<p class="standfirst">
+Ludo takes about four seconds to explain. Running it live for millions of daily players
+is a different game entirely — and it taught me how production multiplayer really works.
+</p>
+
+<p>
+<strong>Ludo Club</strong> is the online multiplayer version of the hit dice game. I worked on it
+at Ulka Games Ltd / Moonfrog Labs (Jun 2020 — Jul 2022): Node.js micro-services on the backend,
+Unity3D and Cocos frontends, real-time multiplayer synchronisation, and live operations.
+</p>
+
+<h2>Micro-services, because one server can't hold millions of rooms</h2>
+
+<p>
+Rooms, matches and player state are spread across services rather than living in one process.
+That keeps a spike in one region from taking down everyone, and lets each piece — matchmaking,
+match state, accounts — scale and deploy on its own rhythm.
+</p>
+
+<h2>Sync is the product</h2>
+
+<p>
+In a live dice match, the client and the server will disagree: a dropped connection, a late
+packet, a player who leaves mid-match and comes back. The server has to stay authoritative
+about turns and state, and reconciliation has to be invisible to the players still at the table.
+None of that shows up in a screenshot, and all of it decides whether the game is playable.
+</p>
+
+<h2>Production debugging is a different discipline</h2>
+
+<p>
+The bug is in someone else's match, on a device you don't have, on a connection you can't
+reproduce — and the game keeps running while you look for it. You learn to reason from logs
+and state rather than from a breakpoint, and to ship retention fixes into a codebase where
+anything you break is broken for everyone at once.
+</p>
+
+<p>
+Simple rules, hard infrastructure. That combination is why this project stays on my portfolio.
+</p>
+
+</article>
+
+<div class="endnote">
+  <p>
+    Ludo Club is live at
+    <a href="https://ludoclub.com" target="_blank" rel="noopener">ludoclub.com</a>.
+    I'm a Software Engineer at Metamorphosis Ltd — more of what I've built is
+    <a href="../">in the village</a>.
+  </p>
+  <div class="nextprev">
+    <a href="server-authoritative-config.html">Next: enterprise HR on Odoo →</a>
+    <a href="./">All notes</a>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
