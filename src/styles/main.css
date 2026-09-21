@@ -94,6 +94,14 @@
            background:#fff6e2; border:3px solid #33241c; border-radius:10px;
            box-shadow:0 3px 0 #33241c;}
 
+  /* --- live stats panel (right side) --- */
+  #stats{position:absolute; right:12px; top:64px; width:178px; pointer-events:none;
+         font-variant-numeric:tabular-nums;}
+  #stats .shead{font-size:10px; letter-spacing:.16em; font-weight:700; color:var(--accent-2); margin-bottom:5px}
+  #stats .srow{display:flex; justify-content:space-between; gap:10px; font-size:11px; color:var(--ink-dim); margin:3px 0}
+  #stats .srow b{color:var(--ink); font-weight:600; white-space:nowrap}
+  #hud.min #stats{display:none}
+
   #touch{position:absolute; inset:0; display:none; pointer-events:none}
   #stick{position:absolute; left:50%; transform:translateX(-50%); bottom:26px; width:124px; height:124px;
          border:4px solid rgba(51,36,28,.75); border-radius:50%;
@@ -253,6 +261,7 @@
   @media (max-width:600px), (pointer:coarse){
     button.k, a.k{font-size:11px; padding:7px 9px}
     #minimap{width:104px; height:72px; bottom:auto; top:150px; right:10px}
+    #stats{top:234px; right:10px; width:150px}
     #spd{width:110px}
     #avatar{width:72px; height:72px; flex:0 0 72px; margin:0}
     .card-head h2{font-size:15px}

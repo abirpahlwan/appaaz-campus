@@ -154,7 +154,7 @@ export function buildFoliage(scene: THREE.Scene) {
      regions read as open field instead of uniform lawn */
   const gMat = windify(new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }), 9, 2.6);
   const campusWeight = (x: number, z: number) => 1 - 0.65 * smooth(1500, 4500, Math.hypot(x, z));
-  const grass = scatter(150000 * Q, (x, z, h) => {
+  const grass = scatter(37500 * Q, (x, z, h) => {
     if (!onLand(x, z, h)) return 0;
     const cov = cover(x, z);
     const g = (0.25 + meadow(x, z) * 0.75) * campusWeight(x, z);
