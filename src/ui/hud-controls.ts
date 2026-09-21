@@ -31,9 +31,19 @@ const spd=document.getElementById('spd'), spdVal=document.getElementById('spdVal
 function setSpeed(v){ P.speed=parseFloat(v); spdVal.textContent=P.speed.toFixed(1)+'\u00d7'; }
 spd.addEventListener('input', e=>setSpeed(e.target.value));
 setSpeed(spd.value);
-/* keep the keyboard on the game, not the slider */
+/* keep the keyboard on the game, not the slider; hand focus back when done */
 spd.addEventListener('keydown', e=>e.preventDefault());
 spd.addEventListener('change', ()=>spd.blur());
+
+/* camera sliders: hand focus back to the game field after a value changes,
+   so the next WASD/Space press moves the hero instead of the slider */
+for (const id of ['camAngle', 'camDist']) {
+  const el = document.getElementById(id);
+  if (!el) continue;
+  el.addEventListener('keydown', e=>e.preventDefault());
+  el.addEventListener('change', ()=>el.blur());
+  el.addEventListener('pointerup', ()=>setTimeout(()=>el.blur(), 0));   // mouse + touch release
+}
 
 document.getElementById('btnStart').onclick = ()=>{
   AudioManager.unlock();

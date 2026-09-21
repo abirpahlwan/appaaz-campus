@@ -27,7 +27,7 @@ import { initDevPanel } from './devpanel';
    vendor/three.min.js on first toggle; falls back to 2D without WebGL. */
 $S.R3on=false; $S.R3=null; $S.R3loading=false; $S.R3flora=null; $S.R3sprites=null;
 $S.camAngleDeg=(document.getElementById('camAngle').value-0)||22;
-$S.camDist=(document.getElementById('camDist').value-0)||600;
+$S.camDist=2200-((document.getElementById('camDist').value-0)||1600);   // slider is inverted: value 1600 = distance 600
 function r3tex(cv){
   const t=new THREE.CanvasTexture(cv);
   t.magFilter=THREE.NearestFilter; t.minFilter=THREE.NearestFilter;

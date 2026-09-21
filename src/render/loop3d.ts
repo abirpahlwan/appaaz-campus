@@ -184,7 +184,8 @@ document.getElementById('camAngle').oninput=e=>{
   document.getElementById('camAngleVal').textContent=$S.camAngleDeg+'°';
 };
 document.getElementById('camDist').oninput=e=>{
-  $S.camDist=+e.target.value;
+  /* inverted slider: dragging right zooms IN (smaller distance) */
+  $S.camDist=2200-(+e.target.value);
   document.getElementById('camDistVal').textContent=$S.camDist;
 };
 const flypad=document.getElementById('flypad');

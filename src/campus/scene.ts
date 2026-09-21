@@ -90,14 +90,15 @@ export function startCampus() {
   cv.addEventListener('touchmove', e => {
     if (pinch && e.touches.length === 2) {
       const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-      $S.camDist = Math.min(1600, Math.max(120, pinch.dist * pinch.d / Math.max(1, d)));
+      $S.camDist = Math.min(2000, Math.max(200, pinch.dist * pinch.d / Math.max(1, d)));
       syncCamDistUi();
     }
   }, { passive: true });
   cv.addEventListener('touchend', () => { pinch = null; }, { passive: true });
-  cv.addEventListener('wheel', e => { $S.camDist = Math.min(1600, Math.max(120, $S.camDist * (1 + Math.sign(e.deltaY) * 0.08))); syncCamDistUi(); }, { passive: true });
+  cv.addEventListener('wheel', e => { $S.camDist = Math.min(2000, Math.max(200, $S.camDist * (1 + Math.sign(e.deltaY) * 0.08))); syncCamDistUi(); }, { passive: true });
   function syncCamDistUi() {
-    const el = document.getElementById('camDist') as HTMLInputElement; if (el) { el.value = String($S.camDist); const v = document.getElementById('camDistVal'); if (v) v.textContent = String(Math.round($S.camDist)); }
+    const el = document.getElementById('camDist') as HTMLInputElement;
+    if (el) { el.value = String(Math.round(2200 - $S.camDist)); const v = document.getElementById('camDistVal'); if (v) v.textContent = String(Math.round($S.camDist)); }   // slider is inverted
   }
 
   const post = createPost(renderer, scene, cam);
