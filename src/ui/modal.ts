@@ -35,6 +35,7 @@ export function openModal(title, tag, html, pose){
 }
 export function closeModal(){
   modal.classList.remove('on');
+  $R.AudioManager.play('click');
   if(pendingCongrats) setTimeout(showCongrats, 320);
 }
 modal.addEventListener('click', e=>{ if(e.target===modal) closeModal(); });
@@ -117,7 +118,7 @@ export function tryInteract(){
   const first = !$S.near.seen;
   $S.near.seen=true; updateFound();
   if(first) track('panel:'+$S.near.id);
-  $R.AudioManager.play($S.near.secret?'environment':'building');
+  $R.AudioManager.play(first && !$S.near.secret ? 'discovery' : $S.near.secret ? 'environment' : 'building');
   openModal($S.near.title, $S.near.tag, $S.near.html, POSE_BY_ID[$S.near.id]);
 }
 let pendingCongrats = false;

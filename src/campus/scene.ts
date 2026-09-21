@@ -2,6 +2,7 @@
    Reuses the sky, ocean, post-processing, look and quality systems. */
 import * as THREE from 'three';
 import { $S, $R } from '../core/state';
+import { AudioManager } from '../core/audio';
 import { keys, P } from '../entities/player';
 import { LOOK, sunDirection } from '../render/look';
 import { createSky } from '../render/sky';
@@ -9,12 +10,14 @@ import { createOcean, buildShoreTexture } from '../render/ocean';
 import { createPost } from '../render/post';
 import { quality, tickQuality } from '../render/quality';
 import { initDevPanel, SHOTS } from '../render/devpanel';
-import { WORLD, SPAWN, GAZEBO, PATHS, COLLIDERS, GATE } from './layout';
-import { buildTerrain, buildLandGrid, heightAt } from './terrain';
+import { WORLD, SPAWN, GAZEBO, PATHS, COLLIDERS, GATE, PLAZA, LAGOON } from './layout';
+import { buildTerrain, buildLandGrid, heightAt, coast, pathEdgeDist } from './terrain';
 import { buildFoliage } from './foliage';
 import { buildHero } from './player';
 import { buildCampus } from './buildings';
 import { buildInteractables } from './interact';
+import { createPets } from './pets';
+import { createBirds } from './birds';
 import { objs } from '../world/objects';
 
 function onBoardwalk(x: number, z: number) {
@@ -28,6 +31,33 @@ function onBoardwalk(x: number, z: number) {
   return false;
 }
 const groundAt = (x: number, z: number) => onBoardwalk(x, z) ? Math.max(heightAt(x, z), 4.6) : heightAt(x, z);
+
+/* --- audio helpers: footstep surface + ambience zone weights --- */
+function surfaceAt(x: number, z: number): 'grass' | 'sand' | 'stone' | 'wood' {
+  if (onBoardwalk(x, z)) return 'wood';
+  if (pathEdgeDist(x, z) < 2) return 'stone';
+  if (heightAt(x, z) < 3.2 || coast(x, z) < 0.085) return 'sand';
+  return 'grass';
+}
+const sstep = (a: number, b: number, x: number) => { const t = Math.max(0, Math.min(1, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+function zonesAt(x: number, z: number, alt: number, ground: number) {
+  const c = coast(x, z);
+  const lagD = Math.hypot(x - LAGOON[0], z - LAGOON[1]);
+  const lagoon = Math.exp(-((lagD / 340) ** 2));
+  const plazaD = Math.hypot(x - PLAZA[0], z - PLAZA[1]);
+  const plaza = Math.exp(-((plazaD / 420) ** 2));
+  const ridge = sstep(42, 85, ground);
+  const airFade = 1 - sstep(60, 260, alt - ground);
+  const inland = sstep(0.08, 0.2, c);
+  return {
+    sea: 0, // sea bed muted for testing
+    lagoon: lagoon * (0.4 + 0.6 * airFade),
+    ridge: Math.max(ridge, sstep(120, 400, alt - ground) * 0.7),
+    meadow: inland * (1 - lagoon * 0.7) * airFade,
+    plaza: plaza * airFade,
+    birds: inland * (1 - lagoon * 0.8) * (1 - ridge) * airFade,
+  };
+}
 
 export function startCampus() {
   const cv = document.createElement('canvas'); cv.id = 'game3d'; cv.style.cssText = 'position:fixed;inset:0;display:block;';
@@ -56,6 +86,8 @@ export function startCampus() {
   const campus = buildCampus(scene);
   objs.forEach((o: any) => { if (o.kind === 'landmark') o.kind = 'landmark-campus'; });
   const interact = buildInteractables(scene);
+  const pets = createPets(scene);
+  const birds = createBirds(scene);
   $S.campusMode = true;
 
   const sun = new THREE.DirectionalLight(LOOK.sunColor, LOOK.sunIntensity);
@@ -111,8 +143,13 @@ export function startCampus() {
   }
   initDevPanel({ onChange: applyQuality, captureShots: () => { $S.shotJob = { i: 0, frames: 0, saved: null }; } });
 
+  /* --- HUD wildlife panel: species + counts, built once pets load --- */
+  const stAnimals = document.getElementById('stAnimals');
+  let censusBuilt = false;
+
   const key = (k: string) => !!(keys as any)[k];
   let last = performance.now();
+  let stepAcc = 0, prevX = SPAWN[0], prevZ = SPAWN[1], wasAir = false, peakAir = 0;
   const sd = new THREE.Vector3();
   function frame(now: number) {
     requestAnimationFrame(frame);
@@ -161,6 +198,20 @@ export function startCampus() {
     hero.group.rotation.y = pl.face;
     hero.animate(t, pl.moving && pl.alt <= g0 + 1, pl.flying, P.speed || 1.5);
 
+    /* --- audio: zoned ambience, footsteps by surface, jetpack, landing --- */
+    const above = pl.alt - g0;
+    AudioManager.setJetpack(fly);
+    const moved = Math.hypot(pl.x - prevX, pl.z - prevZ); prevX = pl.x; prevZ = pl.z;
+    if (pl.moving && above < 1.5) {
+      stepAcc += moved;
+      if (stepAcc > 38) { stepAcc = 0; AudioManager.playFootstep(surfaceAt(pl.x, pl.z)); }
+    } else stepAcc = Math.min(stepAcc, 20);
+    const airNow = above > 4;
+    if (airNow) peakAir = Math.max(peakAir, above);
+    if (wasAir && !airNow) { if (peakAir > 60) AudioManager.play('land'); peakAir = 0; }
+    wasAir = airNow;
+    AudioManager.updateAmbience(zonesAt(pl.x, pl.z, pl.alt, g0));
+
     /* --- camera: spring follow, orbit, ground collision --- */
     const shot = $S.shotJob;
     if (shot) { if (!shot.saved) shot.saved = [$S.camAngleDeg, $S.camDist]; const s = SHOTS[shot.i]; $S.camAngleDeg = s.pitch; $S.camDist = s.dist; }
@@ -182,6 +233,23 @@ export function startCampus() {
     (scene.background as THREE.Color).set(LOOK.skyHorizon);
     $S.campusNear = interact.update(pl.x, pl.z, pl.alt, t, campus.towerBeam, campus.domeBeam);
     sky.update(t, cam.position); ocean.update(t); foliage.update(cam.position, t); campus.update(t, cam.position);
+    pets.update(dt, t, pl.x, pl.z);
+    birds.update(dt, t);
+
+    /* wildlife census in the HUD, refreshed a couple of times per second
+       (counts drift as pets stream in, so rebuild until stable) */
+    if (!censusBuilt || Math.floor(t * 2) !== Math.floor((t - dt) * 2)) {
+      const cen = pets.census();
+      for (const [k, n] of Object.entries(birds.census())) cen[k] = (cen[k] || 0) + n;
+      const total = Object.values(cen).reduce((a, b) => a + b, 0);
+      if (total > 0) {
+        if (stAnimals) stAnimals.innerHTML = Object.entries(cen)
+          .sort((a, b) => b[1] - a[1])
+          .map(([k, n]) => `<div class="srow"><span>${k}</span><b>${n}</b></div>`).join('')
+          + `<div class="srow shead" style="margin-top:6px"><span>TOTAL</span><b>${total}</b></div>`;
+        if (total >= pets.expected + birds.expected) censusBuilt = true;
+      }
+    }
 
     if (tickQuality(dtMs)) applyQuality();
     post.render(dt);

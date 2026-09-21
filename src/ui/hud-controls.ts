@@ -48,7 +48,7 @@ for (const id of ['camAngle', 'camDist']) {
 document.getElementById('btnStart').onclick = ()=>{
   AudioManager.unlock();
   document.getElementById('intro').style.display='none';
-  toast('Walk through a doorway to go inside'); AudioManager.play('success',{frequency:880}); AudioManager.startBgm();
+  toast('Walk through a doorway to go inside'); AudioManager.play('success',{frequency:880}); AudioManager.startAmbience(); AudioManager.startBgm();
   track('start-playing');
 };
 
