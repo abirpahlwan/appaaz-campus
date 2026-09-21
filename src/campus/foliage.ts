@@ -123,7 +123,7 @@ function scatter(count0: number, accept: Accept, r: () => number) {
 
 const CHUNK = 2500;
 function chunked(geo: THREE.BufferGeometry, mat: THREE.Material, pts: { x: number; y: number; z: number }[], r: () => number,
-  opts: { scale: [number, number]; lift?: number; colors?: string[]; cast?: boolean; receive?: boolean; tilt?: number }) {
+  opts: { scale: [number, number]; lift?: number; colors?: string[]; colorFn?: (x: number, z: number, r: () => number) => string; cast?: boolean; receive?: boolean; tilt?: number }) {
   const groups = new Map<string, typeof pts>();
   for (const p of pts) { const k = Math.floor((p.x + WORLD.w / 2) / CHUNK) + ',' + Math.floor((p.z + WORLD.d / 2) / CHUNK); (groups.get(k) || groups.set(k, []).get(k)!).push(p); }
   const meshes: THREE.InstancedMesh[] = [], m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), s = new THREE.Vector3(), c = new THREE.Color();
@@ -134,7 +134,8 @@ function chunked(geo: THREE.BufferGeometry, mat: THREE.Material, pts: { x: numbe
       e.set((r() - 0.5) * (opts.tilt || 0), r() * Math.PI * 2, (r() - 0.5) * (opts.tilt || 0)); q.setFromEuler(e);
       m.compose(new THREE.Vector3(p.x, p.y + (opts.lift || 0), p.z), q, s.set(sc, sc * (0.85 + r() * 0.3), sc));
       im.setMatrixAt(i, m);
-      if (opts.colors) { c.set(opts.colors[Math.floor(r() * opts.colors.length)]); im.setColorAt(i, c); }
+      const col0 = opts.colorFn ? opts.colorFn(p.x, p.z, r) : opts.colors ? opts.colors[Math.floor(r() * opts.colors.length)] : null;
+      if (col0) { c.set(col0); im.setColorAt(i, c); }
     });
     im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true;
     im.castShadow = !!opts.cast; im.receiveShadow = opts.receive !== false;
@@ -154,7 +155,7 @@ export function buildFoliage(scene: THREE.Scene) {
      regions read as open field instead of uniform lawn */
   const gMat = windify(new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }), 9, 2.6);
   const campusWeight = (x: number, z: number) => 1 - 0.65 * smooth(1500, 4500, Math.hypot(x, z));
-  const grass = scatter(37500 * Q, (x, z, h) => {
+  const grass = scatter(18750 * Q, (x, z, h) => {
     if (!onLand(x, z, h)) return 0;
     const cov = cover(x, z);
     const g = (0.25 + meadow(x, z) * 0.75) * campusWeight(x, z);
@@ -167,13 +168,19 @@ export function buildFoliage(scene: THREE.Scene) {
   /* flowers: clustered patches */
   const fGeo = new THREE.SphereGeometry(1.7, 6, 4);
   const fMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+  /* flower varieties: broad regions share a dominant colour (a blue stretch,
+     a yellow stretch, a rose stretch...), with white and odd blooms mixed in */
+  const FLOWERS = ['#ffffff', '#ffd6e6', '#ffe36e', '#e9d4ff', '#ff9ec2', '#ff8a5c', '#f43f5e', '#c084fc', '#7dd3fc', '#a3e635'];
+  const flowerColor = (x: number, z: number, rr: () => number) =>
+    rr() < 0.25 ? FLOWERS[(rr() * FLOWERS.length) | 0]
+                : FLOWERS[Math.floor(fbm(x * 0.0006 + 300, z * 0.0006 + 180, 2) * FLOWERS.length * 1.7) % FLOWERS.length];
   const flowers = scatter(80000 * Q, (x, z, h) => {
     if (!onLand(x, z, h)) return 0;
     const cov = cover(x, z);
     const patchy = Math.max(0, fbm(x * 0.02 + 5, z * 0.02 + 90, 2) - 0.45) * 2.8;
     return cov > 0.5 ? Math.max(patchy, 0.5 + meadow(x, z)) : patchy;   // flower zones bloom widely
   }, r);
-  all.push(...chunked(fGeo, fMat, flowers, r, { scale: [0.8, 1.4], lift: 6.5, colors: ['#ffffff', '#ffd6e6', '#ffe36e', '#e9d4ff', '#ff9ec2', '#ffffff'], receive: false }));
+  all.push(...chunked(fGeo, fMat, flowers, r, { scale: [0.8, 1.4], lift: 6.5, colorFn: flowerColor, receive: false }));
 
   /* bushes */
   const bush = blobGeometry(9, 1, 1.6, '#4fae5c', '#b5e56e', 5);
@@ -208,7 +215,7 @@ export function buildFoliage(scene: THREE.Scene) {
     if (!onLand(x, z, h)) return 0;
     return cover(x, z) > 0.5 ? 0.5 + meadow(x, z) * 0.5 : 0;
   }, r);
-  all.push(...chunked(specGeo, specMat, specs, r, { scale: [0.6, 1.1], lift: 3.5, colors: ['#ff9ec2', '#ffe36e', '#ffffff', '#e9d4ff', '#ffd6e6'], receive: false }));
+  all.push(...chunked(specGeo, specMat, specs, r, { scale: [0.6, 1.1], lift: 3.5, colorFn: flowerColor, receive: false }));
 
   /* palms near the shore, lagoon and plaza */
   const pMat = windify(new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }), 60, 2.2);

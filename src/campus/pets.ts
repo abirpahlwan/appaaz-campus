@@ -26,6 +26,7 @@ const N_PENGUINS = COARSE ? 12 : 27;         // lagoon colony
 const PER_ISLET = 4;                         // residents per satellite islet
 const FLEE_DIST = 90;
 const ACTIVE_DIST = 2500;                    // beyond this a pet freezes (invisible-level detail)
+const N_HERDS = COARSE ? 6 : 10;             // herd anchors on the main island
 
 function rng(seed: number) { return () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
@@ -47,6 +48,7 @@ interface Pet {
   tLeft: number;
   yOff: number; vy: number;
   phase: number;
+  herd?: number;                             // index into the herd anchors, loners have none
 }
 
 export function createPets(scene: THREE.Scene) {
@@ -54,24 +56,36 @@ export function createPets(scene: THREE.Scene) {
   const pets: Pet[] = [];
   const geos = new Map<SpeciesKey, THREE.BufferGeometry>();
 
-  const makePet = (sp: SpeciesKey, x: number, z: number, r: () => number) => {
+  const makePet = (sp: SpeciesKey, x: number, z: number, r: () => number, herd?: number) => {
     const geo = geos.get(sp); if (!geo) return;
     const grp = new THREE.Group();
     const mesh = new THREE.Mesh(geo, MAT); mesh.castShadow = true;
     grp.add(mesh);
     grp.position.set(x, heightAt(x, z), z);
     scene.add(grp);
-    pets.push({ grp, sp, x, z, heading: r() * Math.PI * 2, state: 'idle', tLeft: 1 + r() * 3, yOff: 0, vy: 0, phase: r() * 7 });
+    pets.push({ grp, sp, x, z, heading: r() * Math.PI * 2, state: 'idle', tLeft: 1 + r() * 3, yOff: 0, vy: 0, phase: r() * 7, herd });
   };
+
+  const herds: [number, number][] = [];
 
   const place = (r: () => number) => {
     const fixed = N_PENGUINS + ISLANDS.length * PER_ISLET;
+    /* herd anchors: most animals share a home range and drift back to it,
+       so you meet flocks of bunnies or a pack of foxes instead of lone strays */
+    for (let h = 0; h < N_HERDS; h++) {
+      let ok = false;
+      for (let tries = 0; tries < 300 && !ok; tries++) {
+        const x = (r() * 2 - 1) * 6200, z = (r() * 2 - 1) * 4200;
+        if (coast(x, z) > 0.2 && heightAt(x, z) > 9 && heightAt(x, z) < 60 && pathEdgeDist(x, z) > 60) { herds.push([x, z]); ok = true; }
+      }
+      if (!ok) herds.push([0, -2000 - h * 900]);
+    }
     /* penguin colony waddling around the lagoon shore */
     for (let i = 0; i < N_PENGUINS; i++) {
       const a = r() * Math.PI * 2, d = 220 + r() * 160;
       makePet('penguin', LAGOON[0] + Math.cos(a) * d, LAGOON[1] + Math.sin(a) * d * 0.8, r);
     }
-    /* two residents per satellite islet, different species */
+    /* residents per satellite islet, different species */
     const roster: SpeciesKey[] = ['penguin', 'cat', 'dog', 'bunny', 'fox', 'parrot'];
     ISLANDS.forEach((is, i) => {
       for (let k = 0; k < PER_ISLET; k++) {
@@ -79,7 +93,17 @@ export function createPets(scene: THREE.Scene) {
         makePet(roster[(i * 2 + k) % roster.length], is.x + Math.cos(a) * d, is.z + Math.sin(a) * d, r);
       }
     });
-    /* the rest by habitat on the main island */
+    /* herds on the main island: 3-7 animals, mostly one species per herd */
+    herds.forEach(([hx, hz], h) => {
+      const n = 3 + ((r() * 5) | 0);
+      const lead = pickSpecies(cover(hx, hz), r);
+      for (let i = 0; i < n; i++) {
+        const a = r() * Math.PI * 2, d = 40 + r() * 220;
+        const sp = r() < 0.8 ? lead : pickSpecies(cover(hx, hz), r);
+        makePet(sp, hx + Math.cos(a) * d, hz + Math.sin(a) * d, r, h);
+      }
+    });
+    /* loners fill the rest by habitat */
     for (let tries = 0; pets.length < N_MAIN + fixed && tries < 40000; tries++) {
       const x = (r() * 2 - 1) * 6600, z = (r() * 2 - 1) * 4600;
       if (coast(x, z) < 0.14 || heightAt(x, z) < 8 || heightAt(x, z) > 70) continue;
@@ -116,7 +140,7 @@ export function createPets(scene: THREE.Scene) {
       if (p.tLeft <= 0 && p.state !== 'flee') {
         const roll = Math.random();
         if (roll < 0.42) { p.state = 'idle'; p.tLeft = 1.5 + Math.random() * 3.5; }
-        else if (roll < 0.85) { p.state = 'walk'; p.tLeft = 2 + Math.random() * 4; p.heading += (Math.random() - 0.5) * 2.4; }
+        else if (roll < 0.85) { p.state = 'walk'; p.tLeft = 2 + Math.random() * 4; if (p.herd !== undefined && Math.random() < 0.65) { const [cx, cz] = herds[p.herd]; p.heading = Math.atan2(cx - p.x, cz - p.z) + (Math.random() - 0.5) * 1.4; } else p.heading += (Math.random() - 0.5) * 2.4; }
         else if (roll < 0.95) { p.state = 'run'; p.tLeft = 0.8 + Math.random() * 1.2; p.heading += (Math.random() - 0.5) * 1.6; }
         else if (p.yOff === 0) { p.state = 'hop'; p.tLeft = 0.4; p.vy = 10 * Math.sqrt(S.h); }   // hop impulse scales with size
       }
