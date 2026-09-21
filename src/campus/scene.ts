@@ -146,6 +146,10 @@ export function startCampus() {
   /* --- HUD wildlife panel: species + counts, built once pets load --- */
   const stAnimals = document.getElementById('stAnimals');
   let censusBuilt = false;
+  const SP_EMOJI: Record<string, string> = {
+    bunny: '🐰', fox: '🦊', cat: '🐱', dog: '🐶', parrot: '🦜', penguin: '🐧',
+    sparrow: '🐦', gull: '🕊️', crow: '🐦‍⬛', heron: '🦩',
+  };
 
   const key = (k: string) => !!(keys as any)[k];
   let last = performance.now();
@@ -245,7 +249,7 @@ export function startCampus() {
       if (total > 0) {
         if (stAnimals) stAnimals.innerHTML = Object.entries(cen)
           .sort((a, b) => b[1] - a[1])
-          .map(([k, n]) => `<div class="srow"><span>${k}</span><b>${n}</b></div>`).join('')
+          .map(([k, n]) => `<div class="srow" title="${k}"><span>${SP_EMOJI[k] || k}</span><b>${n}</b></div>`).join('')
           + `<div class="srow shead" style="margin-top:6px"><span>TOTAL</span><b>${total}</b></div>`;
         if (total >= pets.expected + birds.expected) censusBuilt = true;
       }
