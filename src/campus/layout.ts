@@ -18,18 +18,19 @@ export const LAGOON: Vec2 = [-660, 330];               // lagoon with gazebo
 export const GAZEBO: Vec2 = [-560, 300];
 export const SPAWN: Vec2 = [0, 640];
 
-/* eight tiny satellite islands scattered in the sea around the main island.
-   r = coast radius (before noise wobble), h = peak height, k = idiosyncrasy
-   seed offset so each island gets its own shoreline and hills. */
+/* eight satellite islands scattered in the sea around the main island.
+   r = coast radius (before noise wobble), h = hill height added at the
+   centre, k = seed offset so each island gets its own shoreline. Sized
+   and placed so even the wobbled shore never crosses the terrain edge. */
 export const ISLANDS: { x: number; z: number; r: number; h: number; k: number }[] = [
-  { x: 3700, z: 4900, r: 260, h: 20, k: 3 },
-  { x: -3900, z: 4900, r: 330, h: 26, k: 7 },
-  { x: 7200, z: -450, r: 220, h: 17, k: 11 },
-  { x: -7200, z: -1300, r: 300, h: 24, k: 17 },
-  { x: 2200, z: -5200, r: 240, h: 18, k: 23 },
-  { x: -3000, z: -5200, r: 200, h: 15, k: 29 },
-  { x: 6100, z: -3600, r: 350, h: 28, k: 31 },
-  { x: -1600, z: 5500, r: 210, h: 16, k: 37 },
+  { x: 3700, z: 4500, r: 650, h: 32, k: 3 },
+  { x: -3900, z: 4400, r: 800, h: 42, k: 7 },
+  { x: 6700, z: -450, r: 550, h: 27, k: 11 },
+  { x: -6400, z: -1300, r: 800, h: 38, k: 17 },
+  { x: 2200, z: -4800, r: 480, h: 29, k: 23 },
+  { x: -3000, z: -4650, r: 600, h: 24, k: 29 },
+  { x: 6100, z: -3600, r: 850, h: 45, k: 31 },
+  { x: -1600, z: 4900, r: 420, h: 26, k: 37 },
 ];
 
 /* six project pavilions on a ring around the plaza */

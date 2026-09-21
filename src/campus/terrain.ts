@@ -25,7 +25,7 @@ export function coast(x: number, z: number) {
     const dx = x - is.x, dz = z - is.z;
     const d = Math.hypot(dx, dz) / is.r;
     if (d > 2.6) continue;                                                     // cheap early-out
-    const w = 1 + (fbm(dx * 0.0022 + is.k, dz * 0.0022 + is.k * 1.7, 2) - 0.5) * 0.5;
+    const w = 1 + (fbm(dx * 0.0018 + is.k, dz * 0.0018 + is.k * 1.7, 2) - 0.5) * 0.5;
     best = Math.max(best, 1 - d * w);
   }
   return best;
@@ -43,6 +43,11 @@ export function heightAt(x: number, z: number) {
   h = mix(h, 12, (1 - smooth(140, 300, gd)));
   const ld = Math.hypot((x - LAGOON[0]) / 1.15, z - LAGOON[1]);                 // lagoon basin
   h = mix(h, -16, 1 - smooth(200, 330, ld));
+  for (const is of ISLANDS) {                                                   // each islet gets a gentle hill at its centre
+    const dx = x - is.x, dz = z - is.z;
+    if (Math.abs(dx) > is.r * 2 || Math.abs(dz) > is.r * 2) continue;
+    h += is.h * Math.exp(-((dx / (is.r * 0.7)) ** 2 + (dz / (is.r * 0.7)) ** 2));
+  }
   return h;
 }
 
@@ -79,6 +84,17 @@ export function buildPathMask(res = 3) {
 /* ---------- mesh ---------- */
 const C = (hex: string) => new THREE.Color(hex);
 const GRASS_LIGHT = C('#a3dc62'), GRASS_MID = C('#7cc852'), GRASS_DARK = C('#4fa650'), SAND = C('#f3e2ae'), WET = C('#d9c38b'), ROCK = C('#b9a98e');
+const FIELD = C('#d9c98a'), FIELD_ALT = C('#c9d787'), FLOW = C('#e8b7d8');   // bare field, dry-grass field, flower tint
+
+/** large-scale land cover: 0 = bare/dry field, 0.5 = grassy, 1 = flower meadow.
+    Big blobs so whole regions read as "field" or "flowers" instead of uniform lawn. */
+export function cover(x: number, z: number) {
+  const c1 = fbm(x * 0.00045 + 60, z * 0.00045 + 30, 3);
+  const c2 = fbm(x * 0.00045 + 120, z * 0.00045 + 80, 3);
+  if (c1 < 0.42) return 0;                                    // wide bare-field regions
+  if (c2 > 0.62) return 1;                                    // wide flower-meadow regions
+  return 0.5;
+}
 
 export function buildTerrain(step = 8) {
   const segX = Math.round(WORLD.w / step), segZ = Math.round(WORLD.d / step);
@@ -95,7 +111,11 @@ export function buildTerrain(step = 8) {
     tmp.copy(GRASS_MID).lerp(GRASS_LIGHT, smooth(0.35, 0.7, n1)).lerp(GRASS_DARK, smooth(0.55, 0.85, n2) * 0.5 + smooth(30, 90, y) * 0.35);
     if (ny < 0.8) tmp.lerp(ROCK, smooth(0.8, 0.55, ny));
     const cc = coast(x, z);
-    tmp.lerp(SAND, 1 - smooth(0.035, 0.085, cc)).lerp(WET, smooth(2.2, 0.2, y) * 0.8);
+    const cov = smooth(0.07, 0.12, cc) * cover(x, z);          // only inland: field/flower zones, coasts stay grassy
+    tmp.lerp(SAND, 1 - smooth(0.035, 0.085, cc));
+    tmp.lerp(FIELD.clone().lerp(FIELD_ALT, n1), 1 - smooth(0.25, 0.5, cov));   // bare/dry field regions
+    tmp.lerp(FLOW, smooth(0.5, 0.8, cov));                             // flower-meadow tint
+    tmp.lerp(WET, smooth(2.2, 0.2, y) * 0.8);
     col[i * 3] = tmp.r; col[i * 3 + 1] = tmp.g; col[i * 3 + 2] = tmp.b;
   }
   g.setAttribute('color', new THREE.BufferAttribute(col, 3));

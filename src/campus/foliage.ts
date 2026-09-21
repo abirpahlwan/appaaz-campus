@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { WORLD, KEEP_CLEAR, LAGOON, GAZEBO } from './layout';
-import { heightAt, pathEdgeDist, fbm, coast, smooth } from './terrain';
+import { heightAt, pathEdgeDist, fbm, coast, smooth, cover } from './terrain';
 
 export const wind = { time: { value: 0 } };
 const DENSITY = Math.max(0.02, Math.min(2, parseFloat(new URLSearchParams(location.search).get('density') || '1')));
@@ -150,28 +150,65 @@ export function buildFoliage(scene: THREE.Scene) {
   const onLand = (x: number, z: number, h: number) => h > 7.2 && coast(x, z) > 0.055 && clearOf(x, z) && pathEdgeDist(x, z) > 3;
 
   /* grass: full density around the built campus, thinning out across the
-     wide quiet ring so the big island stays airy instead of noisy */
+     wide quiet ring, and skipping the bare-field/flower cover zones so whole
+     regions read as open field instead of uniform lawn */
   const gMat = windify(new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }), 9, 2.6);
   const campusWeight = (x: number, z: number) => 1 - 0.65 * smooth(1500, 4500, Math.hypot(x, z));
-  const grass = scatter(320000 * Q, (x, z, h) => onLand(x, z, h) ? (0.25 + meadow(x, z) * 0.75) * campusWeight(x, z) : 0, r);
+  const grass = scatter(150000 * Q, (x, z, h) => {
+    if (!onLand(x, z, h)) return 0;
+    const cov = cover(x, z);
+    const g = (0.25 + meadow(x, z) * 0.75) * campusWeight(x, z);
+    if (cov < 0.5) return g * 0.12;                             // bare field: only sparse tufts
+    if (cov > 0.5) return g * 0.35;                             // flower meadow: light grass
+    return g;
+  }, r);
   for (const m of chunked(grassGeometry(), gMat, grass, r, { scale: [0.8, 1.6], tilt: 0.25, receive: true })) { grassChunks.push(m); all.push(m); }
 
   /* flowers: clustered patches */
   const fGeo = new THREE.SphereGeometry(1.7, 6, 4);
   const fMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
-  const flowers = scatter(80000 * Q, (x, z, h) => onLand(x, z, h) ? Math.max(0, fbm(x * 0.02 + 5, z * 0.02 + 90, 2) - 0.45) * 2.8 : 0, r);
+  const flowers = scatter(80000 * Q, (x, z, h) => {
+    if (!onLand(x, z, h)) return 0;
+    const cov = cover(x, z);
+    const patchy = Math.max(0, fbm(x * 0.02 + 5, z * 0.02 + 90, 2) - 0.45) * 2.8;
+    return cov > 0.5 ? Math.max(patchy, 0.5 + meadow(x, z)) : patchy;   // flower zones bloom widely
+  }, r);
   all.push(...chunked(fGeo, fMat, flowers, r, { scale: [0.8, 1.4], lift: 6.5, colors: ['#ffffff', '#ffd6e6', '#ffe36e', '#e9d4ff', '#ff9ec2', '#ffffff'], receive: false }));
 
   /* bushes */
   const bush = blobGeometry(9, 1, 1.6, '#4fae5c', '#b5e56e', 5);
   const bMat = new THREE.MeshLambertMaterial({ vertexColors: true });
-  const bushes = scatter(4000 * Q, (x, z, h) => onLand(x, z, h) ? 0.15 + meadow(x, z) * 0.6 : 0, r);
+  const bushes = scatter(4000 * Q, (x, z, h) => {
+    if (!onLand(x, z, h)) return 0;
+    const cov = cover(x, z);
+    return cov < 0.5 ? (0.15 + meadow(x, z) * 0.6) * 0.3 : 0.15 + meadow(x, z) * 0.6;   // bushes hug the grassy zones
+  }, r);
   all.push(...chunked(bush, bMat, bushes, r, { scale: [0.7, 1.7], lift: 3, cast: true }));
 
   /* broadleaf trees (three variants) */
   const tMat = new THREE.MeshLambertMaterial({ vertexColors: true });
   const treeSpots = scatter(1400 * Q, (x, z, h) => (onLand(x, z, h) && Math.hypot(x, z - 300) > 380) ? Math.pow(meadow(x + 300, z), 3) * 1.6 + (h > 30 ? 0.25 : 0) : 0, r);
   for (let v = 0; v < 3; v++) all.push(...chunked(treeGeometry(11 + v * 7), tMat, treeSpots.filter((_, i) => i % 3 === v), r, { scale: [0.7, 1.35], cast: true, tilt: 0.06 }));
+
+  /* meadow clumps: taller dry-grass tufts dotting the bare fields */
+  const clumpGeo = blobGeometry(3.4, 0, 1.1, '#c9b96a', '#e6d98f', 77);
+  const clumpMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  const clumps = scatter(9000 * Q, (x, z, h) => {
+    if (!onLand(x, z, h)) return 0;
+    const cov = cover(x, z);
+    if (cov > 0.5) return 0;                                    // no dry clumps in flower zones
+    return cov < 0.5 ? 0.55 : 0.18;
+  }, r);
+  all.push(...chunked(clumpGeo, clumpMat, clumps, r, { scale: [0.8, 1.8], lift: 2, receive: true }));
+
+  /* flower-spec speckle across the flower zones so the tint reads as blossoms */
+  const specGeo = new THREE.SphereGeometry(1.1, 5, 4);
+  const specMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+  const specs = scatter(60000 * Q, (x, z, h) => {
+    if (!onLand(x, z, h)) return 0;
+    return cover(x, z) > 0.5 ? 0.5 + meadow(x, z) * 0.5 : 0;
+  }, r);
+  all.push(...chunked(specGeo, specMat, specs, r, { scale: [0.6, 1.1], lift: 3.5, colors: ['#ff9ec2', '#ffe36e', '#ffffff', '#e9d4ff', '#ffd6e6'], receive: false }));
 
   /* palms near the shore, lagoon and plaza */
   const pMat = windify(new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }), 60, 2.2);
