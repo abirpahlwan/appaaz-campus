@@ -1,0 +1,621 @@
+// @ts-nocheck
+/* Ported from the legacy single-file script (mechanical split). */
+
+
+
+
+
+
+
+
+
+
+
+/* ==================================================================
+   1.  CONTENT — edit this block, nothing else
+   ================================================================== */
+export const CONTENT = {
+  name: "PAHLWAN RABIUL ISLAM",
+  role: "Full-Stack Software Engineer · 5+ years · 20+ projects · Dhaka",
+  tagline: "Five years of web, mobile, games and AR/VR work, laid out as a solarpunk city. Walk in through any door \u2014 the roof comes off.",
+  blurb: "I'm a full-stack software engineer based in Dhaka, Bangladesh. I build web and mobile apps, multiplayer games, AR/VR experiences, and enterprise systems — React and Next.js up front, Node.js, Django, Laravel and Odoo behind them, Unity3D, Cocos and Android on devices. Currently Software Engineer at Metamorphosis Ltd, working on an enterprise HR app connected to Odoo ERP.",
+
+  objects: [
+    /* ================= ABOUT ================= */
+    {
+      id:"about", kind:"desk", tile:[7,7], w:4, h:2, label:"My desk",
+      title:"About me", tag:"the desk",
+      html:`
+        <h3>Five years, 20+ projects</h3>
+        <p>I'm Pahlwan Rabiul Islam, a full-stack software engineer based in Dhaka, Bangladesh.
+        I work across web, mobile, games, blockchain and AR/VR — from enterprise HR systems on
+        Odoo to a multiplayer dice game with 5M+ daily active users.</p>
+        <p>Currently I'm a <b>Software Engineer at Metamorphosis Ltd</b> (Apr 2025 — present),
+        building an enterprise HR app connected to Odoo ERP, with role-based access, attendance
+        and leave management.</p>
+        <h3>How I work</h3>
+        <p>Project analysis first, then small shippable steps. I've led teams and coordinated
+        distributed teams, run Scrum, set up Slack and JIRA workflows, and coached teammates on
+        SDLC and engineering best practices.</p>
+        <h3>Background</h3>
+        <p><b>MSc in Computer Science</b> (AIUB, 2020) focused on AI, ML and NLP, and a
+        <b>BSc in Computer Science &amp; Software Engineering</b> (AIUB, 2014–2017) focused on
+        Android, web, image processing and VR. HSC and SSC with GPA 5.0 (Dhaka Board).</p>
+        <h3>Off the clock</h3>
+        <p>HCI and psychology, UI/UX and product design, AI, robots, drones and space —
+        plus film-making and photography, guitar and FL Studio, and philosophy and
+        political economics.</p>`
+    },
+
+    /* ================= COMPETITIVE GAMES ================= */
+    {
+      id:"c1", kind:"arcade", tile:[22,6], w:2, h:3, label:"Ludo Club", accent:"#ff6b6b",
+      title:"Ludo Club", tag:"multiplayer · NodeJS · Unity3D · Ulka / Moonfrog",
+      html:`
+        <h3>What it is</h3>
+        <p>Online multiplayer version of the hit dice game — <b>5M+ daily active users</b> —
+        with enterprise-scale infrastructure. Built at Ulka Games Ltd / Moonfrog Labs
+        (Jun 2020 — Jul 2022).</p>
+
+        <h3>My part</h3>
+        <p>Backend and live game work on a title that was already live and already large:
+        Node.js micro-services, Unity3D and Cocos frontends, real-time multiplayer
+        synchronisation, and live operations.</p>
+
+        <h3>The hard part</h3>
+        <ul>
+          <li><b>Scale.</b> Millions of daily players means rooms, matches and state have to
+          stay correct while the game keeps running.</li>
+          <li><b>Sync.</b> Real-time dice matches across devices and connections — reconciling
+          state when clients and servers disagree.</li>
+          <li><b>Live ops.</b> Retention metrics and production fixes where anything broken is
+          broken for everyone at once.</li>
+        </ul>
+
+        <h3>Visit</h3>
+        <p>
+          <a class="store" href="https://ludoclub.com" target="_blank" rel="noopener">ludoclub.com →</a>
+        </p>`
+    },
+    {
+      id:"c2", kind:"arcade", tile:[26,6], w:2, h:3, ldy:-10, label:"HR App", accent:"#4cc9f0",
+      title:"HR App (Enterprise)", tag:"enterprise · React/Next.js · Odoo · Metamorphosis",
+      html:`
+        <h3>What it is</h3>
+        <p>Comprehensive human resource management system integrated with Odoo ERP —
+        my current work at <b>Metamorphosis Ltd</b> (Apr 2025 — present).</p>
+
+        <h3>My part</h3>
+        <p>HR app connected to Odoo as the backend, with role-based login and access control,
+        attendance and leave management, enterprise-level support and Odoo upgrades.</p>
+
+        <h3>Why it matters</h3>
+        <p>Enterprise work lives or dies on process: bridging business needs with engineering
+        tasks, streamlining company operations, and coaching team members on SDLC and
+        engineering best practices.</p>`
+    },
+    {
+      id:"cb", kind:"arcade", tile:[30,6], w:2, h:3, label:"AR Furniture", accent:"#06d6a0",
+      title:"AR Furniture Placement", tag:"AR · Unity3D/C# · ARCore · Dreamerz Lab",
+      html:`
+        <h3>What it is</h3>
+        <p>Augmented reality app for visualising furniture in real spaces — built at
+        <b>Dreamerz Lab Ltd</b> (2019).</p>
+
+        <h3>My part</h3>
+        <p>Real-time AR visualisation, mobile optimisation, 3D model rendering and a
+        user-friendly interface for placing furniture at real-world scale.</p>
+
+        <h3>Why that architecture</h3>
+        <ul>
+          <li><b>Real-time.</b> Plane detection and tracking have to stay stable while the
+          user walks around the room.</li>
+          <li><b>Mobile-first.</b> Rendering quality balanced against battery, heat and
+          low-end devices.</li>
+        </ul>`
+    },
+    {
+      id:"c3", kind:"arcade", tile:[34,6], w:2, h:3, label:"Live Art", accent:"#c77dff",
+      title:"Live Art", tag:"AR e-commerce · Unity3D · React · Activation",
+      html:`
+        <h3>What it is</h3>
+        <p>Augmented reality e-commerce platform for artists and collectors — freelance work
+        for <b>Activation Ltd</b> (Oct 2019 — Mar 2020).</p>
+
+        <h3>My part</h3>
+        <ul>
+          <li><b>AR product visualisation</b> with ARFoundation for cross-platform AR.</li>
+          <li><b>Marketplace surfaces</b> — artist marketplace and digital asset management.</li>
+          <li><b>Usability</b> — intuitive interfaces for complex AR features.</li>
+        </ul>
+
+        <h3>Visit</h3>
+        <p>
+          <a class="store" href="https://liveartapp.com" target="_blank" rel="noopener">liveartapp.com →</a>
+        </p>`
+    },
+    {
+      id:"c5", kind:"arcade", tile:[38,6], w:2, h:3, label:"+ 6 more", accent:"#ffd166",
+      title:"More projects", tag:"web · blockchain · AI · personal",
+      html:`
+        <p>Other work from the portfolio:</p>
+        <ul>
+          <li><b>NFT Marketplace Platform</b> (Hootum, 2023–2025) — blockchain infrastructure,
+          smart contracts and trading-platform R&amp;D with Solidity, Ethereum and Hardhat.</li>
+          <li><b>Our Gazipur</b> (personal, 2018) — community Android app for reporting city
+          issues, with tracking, notifications and location services.</li>
+          <li><b>Hand Gesture Recognition</b> (academic, 2020) — deep-learning 3D hand tracking
+          with TensorFlow, MediaPipe and Unity.</li>
+          <li><b>VR Painting App</b> (Dreamerz Lab, 2018) — immersive 3D painting with inertial
+          sensing and real-time tracking.</li>
+          <li><b>24x7 Live Streaming Server</b> (personal, 2020) — cloud YouTube streaming
+          infrastructure on GCP with Ant Media Server and Node.js.</li>
+          <li><b>3D Game Projects</b> (academic, 2015–2016) — Coin Seeker, Wreck It Bashir and
+          Spooder-Pal in C++ and OpenGL.</li>
+        </ul>`
+    },
+
+    {
+      id:"play", kind:"arcade", tile:[42,6], w:2, h:3, label:"Arcade demos", accent:"#7ee787",
+      title:"Playable \u2014 right here", tag:"web tech demos \u00b7 vanilla JS \u00b7 no install",
+      html:`
+        <h3>Small web games in this village build</h3>
+        <p>These cabinets come with the playable-portfolio template: tiny one-input web games,
+        each a single HTML file that generates its own sound and art at runtime. They are
+        included here as interface demos — they are <b>not</b> my published titles, and the
+        store links on some demo pages belong to the template author, not to me.</p>
+        <p><b><a href="play/">Open the arcade &rarr;</a></b></p>
+        <ul>
+          <li><b><a href="play/slinger.html">Jetpack Slinger</a></b> &mdash; hold to hook a pole,
+          release at the top of the swing, climb.</li>
+          <li><b><a href="play/perigee.html">Perigee</a></b> &mdash; hold to orbit a planet,
+          let go to sling.</li>
+          <li><b><a href="play/cargo.html">Cargo Loop</a></b> &mdash; feed crates onto a belt and
+          flip switches to route them. A prototype.</li>
+          <li><b><a href="play/lumen.html">Lumen Relay</a></b> &mdash; bend a beam through mirrors
+          into every crystal. A prototype.</li>
+        </ul>
+        <p>My own games are the 3D academic projects (Coin Seeker, Wreck It Bashir, Spooder-Pal)
+        and Ludo Club — see the other cabinets in this building.</p>`
+    },
+
+    /* ================= MULTIPLAYER & LIVE SERVICE ================= */
+    {
+      id:"m1", kind:"arcade", tile:[7,19], w:2, h:3, label:"Ludo Live Ops", accent:"#ef476f",
+      title:"Ludo Club — live operations", tag:"multiplayer · Ulka / Moonfrog · 2020–22",
+      html:`
+        <h3>What it is</h3>
+        <p>The online multiplayer version of Ludo — the board game, played live against
+        strangers at scale, with <b>5M+ daily active users</b>.</p>
+
+        <h3>My part</h3>
+        <p>Production support and retention work on a game that was already live and already
+        large: Node.js services, Unity3D/Cocos integration, real-time synchronisation and
+        live-ops metrics.</p>
+
+        <h3>What that work is actually like</h3>
+        <p>Debugging a live multiplayer game means reasoning from logs and state rather than
+        from a breakpoint — the bug is in someone else's match, on a device you don't have.
+        Anything you break is broken for everyone at once.</p>`
+    },
+    {
+      id:"m2", kind:"arcade", tile:[11,19], w:2, h:3, ldy:-10, label:"NFT Platform", accent:"#ffd166",
+      title:"NFT Marketplace Platform", tag:"blockchain · Hootum · 2023–25",
+      html:`
+        <h3>What it is</h3>
+        <p>Research and development of a blockchain-based trading platform and NFT marketplace
+        for creators and collectors.</p>
+
+        <h3>My part</h3>
+        <p><b>Lead Software Engineer:</b> leading the team with Scrum, overseeing development,
+        release and cloud maintenance, plus R&amp;D on marketplace architecture, smart
+        contracts and trading flows.</p>
+
+        <h3>Stack</h3>
+        <p>Solidity, Ethereum, Hardhat, Smart Contracts, Web3 — plus DevOps and LiveOps
+        infrastructure around them.</p>`
+    },
+    {
+      id:"m3", kind:"arcade", tile:[15,19], w:2, h:3, label:"3D Games", accent:"#7ee787",
+      title:"3D Game Projects", tag:"academic · C++ · OpenGL · 2015–16",
+      html:`
+        <h3>What it is</h3>
+        <p>Multiple interactive 3D games with real-time graphics and physics.</p>
+
+        <h3>My part</h3>
+        <ul>
+          <li><b>Coin Seeker</b> — multi-stage adventure game.</li>
+          <li><b>Wreck It Bashir</b> — multiplayer game mechanics.</li>
+          <li><b>Spooder-Pal</b> — procedural city generation.</li>
+        </ul>
+
+        <h3>What that's actually like</h3>
+        <p>Low-level graphics programming: real-time rendering, physics and game loops in C++
+        and OpenGL, where every frame budget decision shows up on screen.</p>`
+    },
+    {
+      id:"m4", kind:"arcade", tile:[19,19], w:2, h:3, ldy:-10, label:"Our Gazipur", accent:"#4cc9f0",
+      title:"Our Gazipur", tag:"Android · Firebase · personal · 2018",
+      html:`
+        <h3>What it is</h3>
+        <p>A community-focused Android application for reporting and tracking city issues.</p>
+
+        <h3>My part</h3>
+        <p>The entire app: issue tracking, community engagement, real-time notifications and
+        location-based services.</p>
+        <ul>
+          <li><b>Android + Java</b> client with Firebase backend</li>
+          <li><b>Real-time updates</b> for reports and notifications</li>
+        </ul>`
+    },
+
+    /* ================= XR & PHYSICAL INTERFACES ================= */
+    {
+      id:"xr", kind:"vrrig", tile:[7,33], w:3, h:2, label:"VR corner",
+      title:"VR & immersive work", tag:"VR · Dreamerz Lab",
+      html:`
+        <p>Immersive work from Dreamerz Lab and academic research — VR apps and tracking
+        rather than off-the-shelf controllers.</p>
+        <ul>
+          <li><b>VR Painting App</b> (Dreamerz Lab, 2018) — immersive 3D painting with inertial
+          measurement, real-time tracking and handheld controller localisation.</li>
+          <li><b>Hand Gesture Recognition</b> (academic, 2020) — deep-learning 3D hand gesture
+          recognition with TensorFlow, MediaPipe and Unity, including VR/AR and mobile AR
+          support.</li>
+          <li><b>VR Painting research</b> — inertial systems and monocular vision for
+          real-time tracking.</li>
+        </ul>
+
+        <h3>Why this is on my portfolio</h3>
+        <p>Custom sensing means noisy real-world input and calibration problems. The job is
+        making the software believe the hardware — filtering, tracking and feedback loops.</p>`
+    },
+    {
+      id:"ar", kind:"arbench", tile:[13,33], w:3, h:2, label:"AR bench",
+      title:"Augmented reality", tag:"AR · Dreamerz Lab & Activation",
+      html:`
+        <ul>
+          <li><b>AR Furniture Placement</b> — real-time AR visualisation on mobile with ARCore
+          and Unity3D: detect planes, render 3D models and keep the interface simple.</li>
+          <li><b>Live Art</b> — ARFoundation e-commerce for artists and collectors: AR product
+          visualisation, marketplace and digital asset management.
+          <a class="store" href="https://liveartapp.com" target="_blank" rel="noopener">liveartapp.com →</a></li>
+          <li><b>Hand Gesture Recognition</b> — MediaPipe + TensorFlow hand tracking feeding
+          Unity, with VR/AR and mobile AR support.</li>
+        </ul>`
+    },
+    {
+      id:"brand", kind:"cartridges", tile:[19,33], w:4, h:2, label:"Web & content",
+      title:"Web, content & coordination", tag:"web · Zufaa Inc",
+      html:`
+        <ul>
+          <li><b>Technical Project Manager</b>, Zufaa Inc, Brooklyn NY (Oct 2022 — Jul 2023) —
+          digital content and marketing: requirement analysis, technical documentation, team
+          building across distributed teams, and Slack &amp; JIRA workflow optimisation.</li>
+          <li><b>24x7 Live Streaming Server</b> — cloud YouTube streaming infrastructure with
+          Ant Media Server, Google Cloud Platform and Node.js.</li>
+          <li><b>Portfolio &amp; product sites</b> — React/Next.js frontends backed by Node,
+          Django, Laravel or Odoo, deployed with modern CI practices.</li>
+        </ul>
+        <h3>What this taught me</h3>
+        <p>Bridging technical and business stakeholders: timelines, requirements and team
+        coordination matter as much as the code. A content business ships on a date, and the
+        date does not move.</p>`
+    },
+
+    /* ================= SYSTEMS & TOOLING ================= */
+    {
+      id:"systems", kind:"rack", tile:[53,6], w:4, h:3, label:"The rack",
+      title:"Systems & tooling", tag:"platform · backend · blockchain",
+      html:`
+        <p>Web, games and enterprise titles all need a reliable layer underneath them. Much of
+        my work is that shared backend and tooling layer.</p>
+        <h3>Services</h3>
+        <ul>
+          <li>Ludo Club Node.js micro-services and real-time multiplayer synchronisation</li>
+          <li>Odoo ERP backend for the enterprise HR app — roles, attendance, leave</li>
+          <li>Blockchain infrastructure: smart contracts and marketplace R&amp;D</li>
+          <li>24x7 streaming infrastructure on GCP with Ant Media Server</li>
+        </ul>
+        <h3>Shared client &amp; web tech</h3>
+        <ul>
+          <li>React/Next.js frontends with REST APIs and Firebase realtime updates</li>
+          <li>Unity3D/Cocos clients wired to platform services</li>
+          <li>ARFoundation/ARCore pipelines for AR apps</li>
+        </ul>
+        <h3>Process</h3>
+        <p>Scrum leadership, release and cloud maintenance, DevOps and LiveOps infrastructure,
+        plus Slack/JIRA workflow optimisation across distributed teams.</p>`
+    },
+
+    /* ================= CRAFT ================= */
+    {
+      id:"craft", kind:"shelf", tile:[52,20], w:5, h:2, label:"Toolbox",
+      title:"Craft & tools", tag:"the shelf",
+      html:`
+        <h3>Languages</h3>
+        <p><span class="pill">JavaScript</span><span class="pill">Python</span><span class="pill">PHP</span>
+        <span class="pill">C#</span><span class="pill">Java</span><span class="pill">C++</span></p>
+        <h3>Frontend</h3>
+        <p><span class="pill">React</span><span class="pill">Next.js</span><span class="pill">Three.js</span>
+        <span class="pill">p5.js</span><span class="pill">HTML/CSS</span><span class="pill">Tailwind CSS</span></p>
+        <h3>Backend</h3>
+        <p><span class="pill">Node.js</span><span class="pill">Express</span><span class="pill">Django</span>
+        <span class="pill">Laravel</span><span class="pill">Odoo</span><span class="pill">Firebase</span></p>
+        <h3>Mobile, XR &amp; games</h3>
+        <p><span class="pill">Unity3D</span><span class="pill">Cocos</span><span class="pill">Android</span>
+        <span class="pill">ARCore</span><span class="pill">ARFoundation</span>
+        <span class="pill">Unreal Engine</span></p>
+        <h3>Blockchain</h3>
+        <p><span class="pill">Solidity</span><span class="pill">Ethereum</span><span class="pill">Hardhat</span>
+        <span class="pill">Smart Contracts</span><span class="pill">Web3</span></p>
+        <h3>AI &amp; ML</h3>
+        <p><span class="pill">TensorFlow</span><span class="pill">NLTK</span><span class="pill">Ollama</span>
+        <span class="pill">MediaPipe</span><span class="pill">OpenCV</span></p>
+        <h3>Databases, cloud &amp; tools</h3>
+        <p><span class="pill">PostgreSQL</span><span class="pill">MongoDB</span><span class="pill">MySQL</span>
+        <span class="pill">SQLite</span><span class="pill">PocketBase</span>
+        <span class="pill">AWS</span><span class="pill">Google Cloud</span><span class="pill">Digital Ocean</span>
+        <span class="pill">Docker</span><span class="pill">CI/CD</span><span class="pill">Git</span>
+        <span class="pill">JIRA</span><span class="pill">Notion</span></p>
+        <h3>Where I'm strongest</h3>
+        <p>Full-stack web &amp; enterprise systems</p><div class="meter"><i style="width:90%"></i></div>
+        <p>Real-time multiplayer &amp; game clients</p><div class="meter"><i style="width:85%"></i></div>
+        <p>AR/VR &amp; mobile apps</p><div class="meter"><i style="width:85%"></i></div>
+        <p>Blockchain &amp; smart contracts</p><div class="meter"><i style="width:75%"></i></div>
+        <p>AI/ML prototypes &amp; team leadership</p><div class="meter"><i style="width:75%"></i></div>
+`
+    },
+
+    /* ================= CAREER ================= */
+    {
+      id:"exp", kind:"board", tile:[34,32], w:5, h:2, label:"Whiteboard",
+      title:"Career", tag:"the whiteboard",
+      html:`
+        <div class="row"><span class="yr">Apr 2025 — now</span><span><b>Software Engineer</b>, Metamorphosis Ltd · Dhaka</span></div>
+        <div class="row"><span class="yr">Dec 2023 — Mar 2025</span><span><b>Lead Software Engineer</b>, Hootum IT Services · blockchain/NFT</span></div>
+        <div class="row"><span class="yr">Oct 2022 — Jul 2023</span><span><b>Technical Project Manager</b>, Zufaa Inc · Brooklyn NY, remote</span></div>
+        <div class="row"><span class="yr">Jun 2020 — Jul 2022</span><span><b>Software Engineer / Game Developer</b>, Ulka Games / Moonfrog Labs · Dhaka</span></div>
+        <div class="row"><span class="yr">Oct 2019 — Mar 2020</span><span><b>Freelance Unity Developer</b>, Activation Ltd · AR e-commerce</span></div>
+        <div class="row"><span class="yr">Apr 2018 — Jul 2019</span><span><b>Senior Developer / Tech Lead</b>, Dreamerz Lab Ltd · AR/VR</span></div>
+        <div class="row"><span class="yr">Sep 2016 — Mar 2017</span><span><b>Software Lead</b>, AIUB Robotic Crew · rover control</span></div>
+        <h3>Education</h3>
+        <div class="row"><span class="yr">2020</span><span><b>MSc in Computer Science</b>, AIUB · AI, ML, NLP</span></div>
+        <div class="row"><span class="yr">2014 — 2017</span><span><b>BSc in Computer Science &amp; Software Engineering</b>, AIUB · Android, web, image processing, VR</span></div>
+        <div class="row"><span class="yr">2012 / 2010</span><span><b>HSC &amp; SSC (Science)</b>, Dhaka Board · GPA 5.0</span></div>
+        <h3>Courses &amp; recognition</h3>
+        <p>Claude Code in Action (Anthropic, 2024) · Generative AI workflows (Microsoft, 2024) · Google AI Professional Certificate (2024) · University Rover Challenge Finalist 2017 · NASA Space Apps Finalist 2017 · IT Noesis Quiz Champion 2015.</p>`
+    },
+    {
+      id:"side", kind:"trophy", tile:[40,34], w:3, h:2, label:"Side projects",
+      title:"Side projects & experiments", tag:"the trophy case",
+      html:`
+        <p>Personal and academic work, separate from client roles.</p>
+        <ul>
+          <li><b>Our Gazipur</b> — community Android app for reporting city issues.</li>
+          <li><b>24x7 Live Streaming Server</b> — cloud YouTube streaming infrastructure.</li>
+          <li><b>3D games</b> — Coin Seeker, Wreck It Bashir and Spooder-Pal in C++/OpenGL.</li>
+          <li><b>Hand Gesture Recognition</b> — TensorFlow/MediaPipe + Unity research.</li>
+          <li><b>Rover control software</b> — AIUB Robotic Crew, University Rover Challenge finalist.</li>
+        </ul>
+        <p><a href="https://github.com/abirpahlwan" target="_blank" rel="noopener">github.com/abirpahlwan →</a></p>`
+    },
+
+    /* ================= CONTACT ================= */
+    {
+      id:"contact", kind:"terminal", tile:[54,33], w:2, h:2, label:"Terminal",
+      title:"Get in touch", tag:"the terminal",
+      html:`
+        <p>Happy to talk about games, live-service architecture, XR, or work.</p>
+
+        <h3>Send me a message</h3>
+        <form class="cform" onsubmit="sendMail(event)">
+          <input id="cSubject" type="text" placeholder="Subject" autocomplete="off">
+          <textarea id="cBody" rows="4" placeholder="Your message…"></textarea>
+          <div class="cform-row">
+            <button type="submit" class="cbtn">✉ Open in my email app</button>
+            <button type="button" class="cbtn ghost" onclick="copyEmail(this)">Copy address</button>
+          </div>
+          <p class="chint">This opens your own mail app with the message ready to send — nothing
+          is submitted to a server, and no one else sees it.</p>
+        </form>
+
+        <h3>Elsewhere</h3>
+        <ul>
+          <li>Email — <a href="mailto:abirpahlwan@gmail.com">abirpahlwan@gmail.com</a></li>
+          <li>Phone — <a href="tel:+8801521107487">+880 1521 107 487</a></li>
+          <li>GitHub — <a href="https://github.com/abirpahlwan" target="_blank" rel="noopener">github.com/abirpahlwan</a></li>
+          <li>LinkedIn — <a href="https://linkedin.com/in/pahlwan" target="_blank" rel="noopener">linkedin.com/in/pahlwan</a></li>
+          <li>Website — <a href="https://pahlwan.tech" target="_blank" rel="noopener">pahlwan.tech</a></li>
+        </ul>
+        <p style="color:var(--ink-dim)">Rajuk Uttara Apartment, Uttara, Dhaka, Bangladesh · BST (UTC+6). Open to freelance, consulting and full-time roles; typically replies in 24–48h.</p>`
+    },
+
+    /* ================= WRITING ================= */
+    {
+      id:"blog", kind:"noticeboard", tile:[31,24], w:3, h:2, label:"Notice board", outdoor:true,
+      title:"Portfolio notes", tag:"the notice board",
+      html:`
+        <p>Short engineering notes drawn from the portfolio. These open as
+        proper pages \u2014 readable, linkable, no joystick required.</p>
+
+        <h3><a href="blog/balance-when-money-is-on-the-line.html" target="_blank" rel="noopener">Ludo Club at 5M+ daily players: what scale teaches you &rarr;</a></h3>
+        <p>Micro-services, real-time sync and live operations on a multiplayer dice game —
+        and why production debugging is a different discipline.</p>
+
+        <h3><a href="blog/server-authoritative-config.html" target="_blank" rel="noopener">Enterprise HR on Odoo: roles, attendance and leave &rarr;</a></h3>
+        <p>Connecting a React/Next.js HR app to Odoo ERP: role-based access, attendance and
+        leave flows, upgrades and support.</p>
+
+        <h3><a href="blog/games-you-play-with-real-objects.html" target="_blank" rel="noopener">AR that has to work in someone's living room &rarr;</a></h3>
+        <p>Furniture placement, marketplace visualisation and hand tracking with ARCore,
+        ARFoundation, MediaPipe and Unity — on real phones, not demos.</p>
+
+        <p style="margin-top:18px">
+          <a class="store" href="blog/" target="_blank" rel="noopener">All notes &rarr;</a>
+        </p>`
+    },
+
+    /* ================= hidden things ================= */
+    {
+      id:"cow", kind:"plant", tile:[46,21], w:1, h:1, label:"???", secret:true,
+      title:"You found the cow", tag:"secret",
+      html:`<p style="font-size:34px;margin:0 0 10px">&#128004;</p>
+            <p>It flies. That's the whole joke, and I've never got tired of it.</p>`
+    },
+    {
+      id:"ball", kind:"football", tile:[9,41], w:1, h:1, label:"???", secret:true,
+      title:"A football in the long grass", tag:"secret",
+      html:`<p style="font-size:34px;margin:0 0 10px">&#9917;</p>
+            <p>I play whenever I can get a game together. It's the only hour of the week where
+            nothing is asynchronous and nobody can file a bug.</p>`
+    },
+    {
+      id:"tea", kind:"teacup", tile:[47,8], w:1, h:1, label:"???", secret:true,
+      title:"Someone left the tea", tag:"secret",
+      html:`<p style="font-size:34px;margin:0 0 10px">&#9749;</p>
+            <p>Cha, usually going cold next to a build that's still running.</p>
+            <p style="color:var(--ink-dim)">Most late sessions behind this village happened
+            somewhere behind a cup like this one.</p>`
+    },
+    {
+      id:"toys", kind:"toybox", tile:[16,28], w:2, h:1, label:"???", secret:true,
+      title:"A small box of toys", tag:"secret",
+      html:`<p style="font-size:34px;margin:0 0 10px">&#129528;</p>
+            <p>A small box of prototypes — rovers, lenses, game builds. The rover years taught
+            me image processing, streaming and feedback loops before any job title did.</p>`
+    },
+    {
+      id:"chess", kind:"chess", tile:[30,35], w:2, h:1, label:"???", secret:true,
+      title:"A game left mid-move", tag:"secret",
+      html:`<p style="font-size:34px;margin:0 0 10px">&#9822;</p>
+            <p>Strategy games. Same instinct as balancing a live economy: read the board, work
+            out which single thing actually decides the outcome, commit to it.</p>`
+    },
+    {
+      id:"bat", kind:"cricketbat", tile:[57,41], w:1, h:1, label:"???", secret:true,
+      title:"A cricket bat against the fence", tag:"secret",
+      html:`<p style="font-size:34px;margin:0 0 10px">&#127951;</p>
+            <p>Cricket in the long grass. Football too — the only hour of the week where
+            nothing is asynchronous and nobody can file a bug.</p>`
+    },
+    {
+      id:"rickshaw", kind:"rickshaw", tile:[11,12], w:2, h:1, label:"???", secret:true,
+      title:"A rickshaw, parked", tag:"secret",
+      html:`<p style="font-size:34px;margin:0 0 10px">&#128131;</p>
+            <p>Dhaka. I've been here the whole time — based in Uttara, working across time
+            zones with distributed teams.</p>`
+    },
+
+    /* ================= LARGER WORLD LANDMARKS ================= */
+    {
+      id:"railway", kind:"landmark", tile:[70,47], w:3, h:2, label:"Railway station", accent:"#e07b3c",
+      title:"The railway", tag:"transport · systems thinking",
+      html:`
+        <p style="font-size:34px;margin:0 0 10px">&#128642;</p>
+        <p>Real-time systems are railways — everything has to arrive in order, on time,
+        and if one thing is late the whole timetable breaks.</p>
+        <h3>What this connects to</h3>
+        <ul>
+          <li><b>Ludo Club</b> — 5M+ daily players means the trains have to run on time,
+          every time. Micro-services, real-time sync, live operations.</li>
+          <li><b>24x7 Live Streaming</b> — continuous delivery infrastructure that never
+          stops, like a railway that never closes.</li>
+          <li><b>Odoo ERP</b> — enterprise systems where process is the track and the
+          trains are attendance, leave and payroll.</li>
+        </ul>
+        <p><a href="blog/balance-when-money-is-on-the-line.html" target="_blank" rel="noopener">Read about scale at Ludo Club &rarr;</a></p>`
+    },
+    {
+      id:"aircraft", kind:"landmark", tile:[73,53], w:3, h:2, label:"Airfield", accent:"#4cc9f0",
+      title:"The airfield", tag:"AR/VR · reaching further",
+      html:`
+        <p style="font-size:34px;margin:0 0 10px">&#9992;&#65039;</p>
+        <p>AR and VR work is about taking flat things and giving them altitude —
+        furniture in your living room, paintings on your wall, hands tracked in 3D space.</p>
+        <h3>Projects that took off</h3>
+        <ul>
+          <li><b>AR Furniture</b> — Dreamerz Lab, real-time plane detection and 3D
+          rendering on mobile.</li>
+          <li><b>Live Art</b> — ARFoundation e-commerce, marketplace and digital
+          assets in augmented space.</li>
+          <li><b>VR Painting</b> — immersive 3D painting with inertial sensing and
+          real-time tracking.</li>
+          <li><b>Hand Gesture Recognition</b> — TensorFlow + MediaPipe + Unity.</li>
+        </ul>`
+    },
+    {
+      id:"rocket", kind:"landmark", tile:[82,53], w:2, h:3, label:"Rocket", accent:"#c77dff",
+      title:"The rocket", tag:"ambition · space · R&D",
+      html:`
+        <p style="font-size:34px;margin:0 0 10px">&#128640;</p>
+        <p>Some projects are rockets — you build the infrastructure, light the fuse,
+        and watch what happens.</p>
+        <h3>R&amp;D and ambitious builds</h3>
+        <ul>
+          <li><b>NFT Marketplace</b> — blockchain infrastructure, smart contracts and
+          trading platform R&amp;D with Solidity, Ethereum and Hardhat.</li>
+          <li><b>Hand Gesture Recognition</b> — deep-learning 3D hand tracking research.</li>
+          <li><b>University Rover Challenge</b> — AIUB Robotic Crew, finalist 2017.</li>
+          <li><b>NASA Space Apps</b> — finalist 2017.</li>
+        </ul>
+        <p>Off the clock: HCI, psychology, AI, robots, drones and space — the interests
+        that fuel the ambitious work.</p>`
+    },
+    {
+      id:"mountain", kind:"landmark", tile:[76,8], w:2, h:2, label:"Mountain peak", accent:"#9aa7b4",
+      title:"The mountain", tag:"depth · systems · foundations",
+      html:`
+        <p style="font-size:34px;margin:0 0 10px">&#127956;</p>
+        <p>Mountains are built from the bottom up — foundations, then layers, then the
+        peak that everyone sees.</p>
+        <h3>The foundation work</h3>
+        <ul>
+          <li><b>MSc Computer Science</b> — AIUB, 2020. AI, ML and NLP.</li>
+          <li><b>BSc Computer Science &amp; Software Engineering</b> — AIUB, 2014–2017.</li>
+          <li><b>3D Games</b> — Coin Seeker, Wreck It Bashir, Spooder-Pal in C++/OpenGL.
+          Low-level graphics where every frame budget decision shows on screen.</li>
+          <li><b>Systems &amp; Tooling</b> — the unglamorous shared layer that every
+          project stands on.</li>
+        </ul>`
+    },
+    {
+      id:"dam", kind:"landmark", tile:[43,30], w:2, h:2, label:"The dam", accent:"#35bfb0",
+      title:"The dam", tag:"infrastructure · flow control",
+      html:`
+        <p style="font-size:34px;margin:0 0 10px">&#127754;</p>
+        <p>Infrastructure is a dam — it holds things back, controls the flow, and
+        when it works nobody notices.</p>
+        <h3>Infrastructure work</h3>
+        <ul>
+          <li><b>24x7 Live Streaming Server</b> — cloud YouTube streaming on GCP with
+          Ant Media Server and Node.js.</li>
+          <li><b>Ludo Club backend</b> — Node.js micro-services handling millions of
+          concurrent players.</li>
+          <li><b>Odoo ERP</b> — enterprise backend connecting HR, attendance and
+          leave management.</li>
+          <li><b>DevOps and LiveOps</b> — release, cloud maintenance and production
+          support.</li>
+        </ul>`
+    },
+    {
+      id:"garden", kind:"landmark", tile:[20,48], w:2, h:2, label:"Garden", accent:"#7ee787",
+      title:"The garden", tag:"growth · mentoring · process",
+      html:`
+        <p style="font-size:34px;margin:0 0 10px">&#127807;</p>
+        <p>Gardens need tending — and so do teams. Much of my work has been growing
+        people and processes alongside the code.</p>
+        <h3>Where I've gardened</h3>
+        <ul>
+          <li><b>Lead Software Engineer</b> at Hootum — leading the team with Scrum,
+          overseeing development, release and cloud maintenance.</li>
+          <li><b>Technical Project Manager</b> at Zufaa Inc — team building across
+          distributed teams, Slack &amp; JIRA workflow optimisation.</li>
+          <li><b>AIUB Robotic Crew</b> — Software Lead, rover control, University
+          Rover Challenge finalist.</li>
+          <li><b>Coaching</b> — SDLC and engineering best practices for teammates.</li>
+        </ul>`
+    }
+  ],
+
+};

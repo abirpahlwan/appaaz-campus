@@ -3,3 +3,6 @@
 .freebuff/
 *.log
 *.err
+node_modules
+dist
+*.tsbuildinfo

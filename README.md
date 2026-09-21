@@ -1,69 +1,49 @@
-# portfolio
-A playable, procedural pixel-art portfolio: walk through a village and a
-growing world where buildings, landscapes, animals, and journeys represent
-Pahlwan's work.
+# appaaz; Campus
 
-## Run locally
+A walkable, solarpunk 3D campus for appaaz; - explore our work, services
+and team. Vite + TypeScript + three.js. Desktop first, 3D only, with a plain
+text version as the fallback.
 
-The project is intentionally self-contained. Serve the repository over HTTP
-from its root, then open `http://localhost:8000/`:
+- Plan, decisions and progress log: [APPAAZ_CAMPUS_PLAN.md](APPAAZ_CAMPUS_PLAN.md)
+- Assets and licences: [ASSETS.md](ASSETS.md)
+- Everything from the old portfolio project lives in `legacy/` (reference only).
 
-```powershell
-python -m http.server 8000
+## Run
+
+```
+npm install
+npm run dev        # dev server
+npm run build      # typecheck + production build into dist/
+npm run preview    # serve the production build
 ```
 
-No build step, package installation, external assets, or network API is
-required.
+The page must be served over HTTP (models are fetched at runtime), which the
+dev server does.
 
-## Controls and interactions
+## Layout
 
-- Move with **WASD** or **arrow keys**.
-- Use **E**, **Space**, or **Enter** near a building, landmark, or animal.
-- Use **M** to switch to the classic/plain reading view.
-- On coarse-pointer devices, use the on-screen stick and **LOOK** action.
-- Audio is off until **Start exploring** is pressed; use **♪ on/off** and the
-  **VOL** slider for procedural feedback and quiet biome motifs. The audio
-  layer uses only Web Audio API tones/noise generated in the page.
-- Explore animals to pet them; friendly rideable animals can be mounted and
-  dismounted through the contextual interaction prompt.
-- The modal panels retain the portfolio content and provide the plain-version
-  fallback for reading, copying, and sharing.
+```
+index.html           markup for the intro, HUD and modal
+public/assets/       models, sprites, matte painting (served as /assets/...)
+src/
+  main.ts            imports the modules in dependency order
+  content/content.ts every readable panel (project, service, team, contact text)
+  core/              shared state, audio, util, update loop
+  world/             map, terrain, water, objects, collision, chatter
+  entities/          player and critters
+  render/            three.js scene, loop, geometry helpers, sky
+  assets/            model catalogue and loaders
+  ui/                modal, HUD and controls, minimap, text version
+legacy/              old portfolio project (moved, not deleted)
+```
 
-## Project surfaces
+## Status
 
-- `index.html` — village/world, procedural Canvas 2D art, UI, controls, and
-  persistence.
-- `blog/` — blog reading surface and shared typography.
-- `play/` — arcade listing, wrappers, and four standalone playable canvases.
-- `PLAN.md`, `AGENT.md`, `TASKS.md` — living implementation and handoff docs.
+The ported modules still carry `// @ts-nocheck` and share state through `$S`
+and forward references through `$R` (`src/core/state.ts`). They are being
+cleaned into typed modules; see the progress log in the plan.
 
-## Workflow and status
+## Controls
 
-Work is merged onto `main`. Static syntax and HTTP smoke checks pass for the
-complete portfolio and game surface. Manual browser/device interaction and
-performance profiling remain release follow-ups; deployment is out of scope.
-
-The newest visual pass adds stronger biome separation and more polished
-mountain, dam, garden, railway, aircraft, and rocket silhouettes while keeping
-the procedural, accessible, performance-bounded architecture intact.
-
-The mountain region also includes an optional switchback ascent, a tiered
-snow-and-alpenglow summit with flag, ambient wind motes, Pipkin the snow hare,
-and small telescope/bell interactions. These are playful, non-progression
-features and do not alter discovery totals or existing save/control contracts.
-
-The currently accepted mountain milestone is Level 3 trail readability plus
-Level 4's compact alpine meadow and meltwater detail, now joined by Level 5's
-compact rope-bridge crossing over the meadow route. Its entry and exit tiles
-remain walkable in both directions and its feedback is contextual only; it
-does not affect progression, discoveries, saves, or controls. Levels 6-10
-remain unstarted milestones.
-
-Milestone commits for this stage are `0b19bdb` (Levels 3-4) and `1969de5`
-(Level 5), with small visual polish in `8b4b02f` and `bdf9473`.
-
-The audio pass adds gesture-gated one-shots for world, animal, summit,
-transport, success/failure, and UI interactions, plus deterministic,
-low-volume biome motifs. It pauses on hidden tabs, respects reduced motion,
-and cleans up on unload. Browser/device playtesting and frame profiling remain
-release follow-ups.
+WASD / arrows to move, E to inspect, hold Space (or Z) for the jetpack and add
+Shift to descend, M for the text version.
