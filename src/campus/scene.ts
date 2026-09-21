@@ -42,16 +42,16 @@ export function startCampus() {
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
 
   const scene = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(52, innerWidth / innerHeight, 2, 30000);
+  const cam = new THREE.PerspectiveCamera(52, innerWidth / innerHeight, 2, 70000);
   scene.background = new THREE.Color(LOOK.skyHorizon);
   scene.fog = new THREE.Fog(LOOK.fogColor, LOOK.fogNear, LOOK.fogFar);
 
   const sky = createSky(); scene.add(sky.mesh);
-  const land = buildLandGrid(10);
+  const land = buildLandGrid(50);
   const shore = buildShoreTexture(land.map, 1, land.w, land.h);
-  const ocean = createOcean({ world: new THREE.Vector2(WORLD.w, WORLD.d), tile: land.cell, shore, size: new THREE.Vector2(40000, 40000) });
+  const ocean = createOcean({ world: new THREE.Vector2(WORLD.w, WORLD.d), tile: land.cell, shore, size: new THREE.Vector2(120000, 120000) });
   scene.add(ocean.mesh);
-  const terrain = buildTerrain(8); scene.add(terrain);
+  const terrain = buildTerrain(24); scene.add(terrain);
   const foliage = buildFoliage(scene);
   const campus = buildCampus(scene);
   objs.forEach((o: any) => { if (o.kind === 'landmark') o.kind = 'landmark-campus'; });

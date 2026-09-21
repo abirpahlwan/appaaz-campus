@@ -5,7 +5,10 @@
 export type Vec2 = [number, number];
 
 export const SEA_LEVEL = 0;
-export const WORLD = { w: 3000, d: 2200 };            // terrain extent, centred on 0,0
+/* The island base was expanded 5× so there is a wide, quiet ring of meadow
+   and open sea around the built campus cluster (which keeps its original
+   player-scale size and spacing). */
+export const WORLD = { w: 15000, d: 11000 };           // terrain extent, centred on 0,0
 
 export const PLAZA: Vec2 = [0, 120];                   // central plaza
 export const GATE: Vec2 = [0, 820];                    // vine arch / entrance
@@ -14,6 +17,20 @@ export const DOME: Vec2 = [-420, -170];                // glass dome (services)
 export const LAGOON: Vec2 = [-660, 330];               // lagoon with gazebo
 export const GAZEBO: Vec2 = [-560, 300];
 export const SPAWN: Vec2 = [0, 640];
+
+/* eight tiny satellite islands scattered in the sea around the main island.
+   r = coast radius (before noise wobble), h = peak height, k = idiosyncrasy
+   seed offset so each island gets its own shoreline and hills. */
+export const ISLANDS: { x: number; z: number; r: number; h: number; k: number }[] = [
+  { x: 3700, z: 4900, r: 260, h: 20, k: 3 },
+  { x: -3900, z: 4900, r: 330, h: 26, k: 7 },
+  { x: 7200, z: -450, r: 220, h: 17, k: 11 },
+  { x: -7200, z: -1300, r: 300, h: 24, k: 17 },
+  { x: 2200, z: -5200, r: 240, h: 18, k: 23 },
+  { x: -3000, z: -5200, r: 200, h: 15, k: 29 },
+  { x: 6100, z: -3600, r: 350, h: 28, k: 31 },
+  { x: -1600, z: 5500, r: 210, h: 16, k: 37 },
+];
 
 /* six project pavilions on a ring around the plaza */
 export const PAVILIONS: Vec2[] = [0, 1, 2, 3, 4, 5].map(i => {

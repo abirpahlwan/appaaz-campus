@@ -1,7 +1,7 @@
 /* Island terrain: smooth heightfield, beach, hills, lagoon, painted ground colours,
    and a flagstone path mask read by the ground shader. */
 import * as THREE from 'three';
-import { WORLD, PLAZA, LAGOON, PATHS, SEA_LEVEL, type Vec2 } from './layout';
+import { WORLD, PLAZA, LAGOON, PATHS, SEA_LEVEL, ISLANDS, type Vec2 } from './layout';
 
 /* ---------- noise ---------- */
 function hash(ix: number, iz: number) { let h = ix * 374761393 + iz * 668265263; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967295; }
@@ -11,22 +11,31 @@ function vnoise(x: number, z: number) {
   return (hash(ix, iz) * (1 - u) + hash(ix + 1, iz) * u) * (1 - v) + (hash(ix, iz + 1) * (1 - u) + hash(ix + 1, iz + 1) * u) * v;
 }
 export function fbm(x: number, z: number, oct = 4) { let a = 0.5, s = 0, f = 1; for (let i = 0; i < oct; i++) { s += a * vnoise(x * f, z * f); f *= 2.03; a *= 0.5; } return s; }
-const smooth = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+export const smooth = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 const mix = (a: number, b: number, t: number) => a + (b - a) * t;
 
 /* ---------- height ---------- */
-/** >0 inland, 0 at the coast, <0 in the sea. */
+/** >0 inland, 0 at the coast, <0 in the sea. Includes the 8 satellite islands. */
 export function coast(x: number, z: number) {
-  const r = Math.hypot(x / 1180, z / 850);
-  const wob = 1 + (fbm(x * 0.0016 + 11, z * 0.0016 + 5, 3) - 0.5) * 0.36 + (fbm(x * 0.006, z * 0.006, 2) - 0.5) * 0.08;
-  return 1 - r * wob;
+  const r = Math.hypot(x / 5900, z / 4250);
+  const wob = 1 + (fbm(x * 0.00032 + 11, z * 0.00032 + 5, 3) - 0.5) * 0.36 + (fbm(x * 0.0012, z * 0.0012, 2) - 0.5) * 0.08;
+  const c = 1 - r * wob;
+  let best = c;
+  for (const is of ISLANDS) {                                                  // satellite islands as small coast bumps
+    const dx = x - is.x, dz = z - is.z;
+    const d = Math.hypot(dx, dz) / is.r;
+    if (d > 2.6) continue;                                                     // cheap early-out
+    const w = 1 + (fbm(dx * 0.0022 + is.k, dz * 0.0022 + is.k * 1.7, 2) - 0.5) * 0.5;
+    best = Math.max(best, 1 - d * w);
+  }
+  return best;
 }
 export function heightAt(x: number, z: number) {
   const c = coast(x, z);
   let h = -18 + 24 * smooth(-0.02, 0.03, c) + 6 * smooth(0.03, 0.18, c);      // sea floor -> beach shelf (+6) -> inland (+12)
-  const hills = (fbm(x * 0.0022 + 3, z * 0.0022 + 9, 4) - 0.32) * 95 + (fbm(x * 0.007, z * 0.007, 2) - 0.5) * 9;
+  const hills = (fbm(x * 0.00044 + 3, z * 0.00044 + 9, 4) - 0.32) * 95 + (fbm(x * 0.0014, z * 0.0014, 2) - 0.5) * 9;
   h += Math.max(0, hills) * smooth(0.1, 0.34, c);
-  h += 64 * Math.exp(-(((x - 780) / 240) ** 2 + ((z + 170) / 200) ** 2));      // turbine ridge
+  h += 64 * Math.exp(-(((x - 780) / 240) ** 2 + ((z + 170) / 200) ** 2));      // turbine ridge (cluster-scale, matches the turbines)
   h += 34 * Math.exp(-(((x + 900) / 220) ** 2 + ((z + 420) / 180) ** 2));      // west knoll
   const pd = Math.hypot(x - PLAZA[0], (z - PLAZA[1]) * 1.15);                   // flat plaza plateau
   h = mix(h, 16, 1 - smooth(300, 560, pd));
@@ -51,15 +60,19 @@ export function pathEdgeDist(x: number, z: number) {
 }
 
 export function buildPathMask(res = 3) {
-  const w = Math.ceil(WORLD.w / res), h = Math.ceil(WORLD.d / res);
+  /* the paths only exist inside the built campus cluster, so the mask only
+     covers that region - keeps the texture cheap on the 5× island */
+  const x0 = -1400, z0 = -900, mw = 3000, md = 2400;
+  const w = Math.ceil(mw / res), h = Math.ceil(md / res);
   const data = new Uint8Array(w * h);
   for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
-    const x = (i + 0.5) * res - WORLD.w / 2, z = (j + 0.5) * res - WORLD.d / 2;
+    const x = x0 + (i + 0.5) * res, z = z0 + (j + 0.5) * res;
     const d = pathEdgeDist(x, z);
     data[j * w + i] = Math.round(255 * (1 - smooth(-1.5, 2.5, d)));
   }
   const tex = new THREE.DataTexture(data, w, h, THREE.RedFormat, THREE.UnsignedByteType);
   tex.magFilter = THREE.LinearFilter; tex.minFilter = THREE.LinearFilter; tex.needsUpdate = true;
+  (tex as any).__maskRegion = [x0, z0, mw, md];
   return tex;
 }
 
@@ -88,20 +101,21 @@ export function buildTerrain(step = 8) {
   g.setAttribute('color', new THREE.BufferAttribute(col, 3));
 
   const pathTex = buildPathMask();
+  const maskRegion = (pathTex as any).__maskRegion as [number, number, number, number];
   const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
   mat.onBeforeCompile = sh => {
     sh.uniforms.uPath = { value: pathTex };
-    sh.uniforms.uWorld = { value: new THREE.Vector2(WORLD.w, WORLD.d) };
+    sh.uniforms.uMask = { value: new THREE.Vector4(...maskRegion) };
     sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWp;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvWp = (modelMatrix * vec4(transformed, 1.0)).xyz;');
     sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
-      varying vec3 vWp; uniform sampler2D uPath; uniform vec2 uWorld;
+      varying vec3 vWp; uniform sampler2D uPath; uniform vec4 uMask;
       float gh(vec2 p){ p = fract(p*vec2(123.34,456.21)); p += dot(p,p+45.32); return fract(p.x*p.y); }
       float gn(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f); return mix(mix(gh(i),gh(i+vec2(1,0)),f.x),mix(gh(i+vec2(0,1)),gh(i+vec2(1,1)),f.x),f.y); }`)
       .replace('#include <color_fragment>', `#include <color_fragment>
       float speck = gn(vWp.xz*0.55) * 0.6 + gn(vWp.xz*1.9) * 0.4;
       diffuseColor.rgb *= 0.9 + 0.2 * speck;
-      float pm = texture2D(uPath, (vWp.xz + uWorld*0.5) / uWorld).r;
+      float pm = texture2D(uPath, (vWp.xz - uMask.xy) / uMask.zw).r;
       vec2 sp = vWp.xz / 10.0; vec2 cell = floor(sp + vec2(0.5*mod(floor(sp.y),2.0), 0.0)); vec2 fr = fract(sp + vec2(0.5*mod(floor(sp.y),2.0), 0.0));
       float mortar = clamp(step(fr.x, 0.07) + step(fr.y, 0.07), 0.0, 1.0);
       vec3 stone = mix(vec3(0.86,0.72,0.50), vec3(0.95,0.87,0.68), gh(cell));
@@ -114,7 +128,7 @@ export function buildTerrain(step = 8) {
 }
 
 /** a coarse land/water grid used by the ocean shader to find the shore distance */
-export function buildLandGrid(cell = 10) {
+export function buildLandGrid(cell = 50) {
   const w = Math.ceil(WORLD.w / cell), h = Math.ceil(WORLD.d / cell), map: number[][] = [];
   for (let j = 0; j < h; j++) { map[j] = []; for (let i = 0; i < w; i++) map[j][i] = heightAt((i + 0.5) * cell - WORLD.w / 2, (j + 0.5) * cell - WORLD.d / 2) > SEA_LEVEL + 0.3 ? 0 : 1; }
   return { map, w, h, cell };

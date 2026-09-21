@@ -20,7 +20,7 @@ export const DEFAULT_LOOK: Look = {
   exposure: 1.0,
   sunColor: '#ffe3b4', sunIntensity: 3.2, sunElevation: 30, sunAzimuth: 150,
   hemiSky: '#a9d8ff', hemiGround: '#6fae5c', hemiIntensity: 1.25,
-  fogColor: '#a9daf2', fogNear: 2500, fogFar: 15000,
+  fogColor: '#a9daf2', fogNear: 1200, fogFar: 26000,
   skyTop: '#1a6fe0', skyMid: '#48aeee', skyHorizon: '#b3e0f8', skySeaHaze: '#9fdcec',
   cloudCover: 0.62, cloudSoftness: 0.12,
   seaShallow: '#63e3d3', seaDeep: '#0f8fbf', seaFoam: '#ffffff', seaGlitter: 1.0,
@@ -29,7 +29,7 @@ export const DEFAULT_LOOK: Look = {
   shadowTint: '#8fb4d8', highlightTint: '#fff0d0',
 };
 
-const KEY = 'appaaz-campus-look-v1';
+const KEY = 'appaaz-campus-look-v2';   // v2: fog ranges rescaled for the wider sea
 
 function load(): Look {
   try {

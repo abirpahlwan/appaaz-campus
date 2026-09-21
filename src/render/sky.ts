@@ -64,7 +64,7 @@ export function createSky() {
       uTime: { value: 0 }, uCover: { value: 0.5 }, uSoft: { value: 0.2 },
     },
   });
-  const mesh = new THREE.Mesh(new THREE.SphereGeometry(8000, 32, 20), mat);
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(45000, 45, 25), mat);
   mesh.frustumCulled = false;
   mesh.renderOrder = -10;
   const sd = new THREE.Vector3();

@@ -3,10 +3,14 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { WORLD, KEEP_CLEAR, LAGOON, GAZEBO } from './layout';
-import { heightAt, pathEdgeDist, fbm, coast } from './terrain';
+import { heightAt, pathEdgeDist, fbm, coast, smooth } from './terrain';
 
 export const wind = { time: { value: 0 } };
 const DENSITY = Math.max(0.02, Math.min(2, parseFloat(new URLSearchParams(location.search).get('density') || '1')));
+/* the island base is 5× wider (25× the area); phones cut vegetation counts
+   roughly in half so the big meadow stays cheap to draw */
+const MOBILE = matchMedia('(pointer:coarse)').matches;
+const Q = MOBILE ? 0.45 : 1;
 
 function rng(seed: number) { return () => { seed |= 0; seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 
@@ -117,7 +121,7 @@ function scatter(count0: number, accept: Accept, r: () => number) {
   return out;
 }
 
-const CHUNK = 500;
+const CHUNK = 2500;
 function chunked(geo: THREE.BufferGeometry, mat: THREE.Material, pts: { x: number; y: number; z: number }[], r: () => number,
   opts: { scale: [number, number]; lift?: number; colors?: string[]; cast?: boolean; receive?: boolean; tilt?: number }) {
   const groups = new Map<string, typeof pts>();
@@ -145,31 +149,33 @@ export function buildFoliage(scene: THREE.Scene) {
   const meadow = (x: number, z: number) => fbm(x * 0.004 + 40, z * 0.004 + 8, 3);
   const onLand = (x: number, z: number, h: number) => h > 7.2 && coast(x, z) > 0.055 && clearOf(x, z) && pathEdgeDist(x, z) > 3;
 
-  /* grass */
+  /* grass: full density around the built campus, thinning out across the
+     wide quiet ring so the big island stays airy instead of noisy */
   const gMat = windify(new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }), 9, 2.6);
-  const grass = scatter(120000, (x, z, h) => onLand(x, z, h) ? 0.25 + meadow(x, z) * 0.75 : 0, r);
+  const campusWeight = (x: number, z: number) => 1 - 0.65 * smooth(1500, 4500, Math.hypot(x, z));
+  const grass = scatter(320000 * Q, (x, z, h) => onLand(x, z, h) ? (0.25 + meadow(x, z) * 0.75) * campusWeight(x, z) : 0, r);
   for (const m of chunked(grassGeometry(), gMat, grass, r, { scale: [0.8, 1.6], tilt: 0.25, receive: true })) { grassChunks.push(m); all.push(m); }
 
   /* flowers: clustered patches */
   const fGeo = new THREE.SphereGeometry(1.7, 6, 4);
   const fMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
-  const flowers = scatter(30000, (x, z, h) => onLand(x, z, h) ? Math.max(0, fbm(x * 0.02 + 5, z * 0.02 + 90, 2) - 0.45) * 2.8 : 0, r);
+  const flowers = scatter(80000 * Q, (x, z, h) => onLand(x, z, h) ? Math.max(0, fbm(x * 0.02 + 5, z * 0.02 + 90, 2) - 0.45) * 2.8 : 0, r);
   all.push(...chunked(fGeo, fMat, flowers, r, { scale: [0.8, 1.4], lift: 6.5, colors: ['#ffffff', '#ffd6e6', '#ffe36e', '#e9d4ff', '#ff9ec2', '#ffffff'], receive: false }));
 
   /* bushes */
   const bush = blobGeometry(9, 1, 1.6, '#4fae5c', '#b5e56e', 5);
   const bMat = new THREE.MeshLambertMaterial({ vertexColors: true });
-  const bushes = scatter(1400, (x, z, h) => onLand(x, z, h) ? 0.15 + meadow(x, z) * 0.6 : 0, r);
+  const bushes = scatter(4000 * Q, (x, z, h) => onLand(x, z, h) ? 0.15 + meadow(x, z) * 0.6 : 0, r);
   all.push(...chunked(bush, bMat, bushes, r, { scale: [0.7, 1.7], lift: 3, cast: true }));
 
   /* broadleaf trees (three variants) */
   const tMat = new THREE.MeshLambertMaterial({ vertexColors: true });
-  const treeSpots = scatter(420, (x, z, h) => (onLand(x, z, h) && Math.hypot(x, z - 300) > 380) ? Math.pow(meadow(x + 300, z), 3) * 1.6 + (h > 30 ? 0.25 : 0) : 0, r);
+  const treeSpots = scatter(1400 * Q, (x, z, h) => (onLand(x, z, h) && Math.hypot(x, z - 300) > 380) ? Math.pow(meadow(x + 300, z), 3) * 1.6 + (h > 30 ? 0.25 : 0) : 0, r);
   for (let v = 0; v < 3; v++) all.push(...chunked(treeGeometry(11 + v * 7), tMat, treeSpots.filter((_, i) => i % 3 === v), r, { scale: [0.7, 1.35], cast: true, tilt: 0.06 }));
 
   /* palms near the shore, lagoon and plaza */
   const pMat = windify(new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }), 60, 2.2);
-  const palmSpots = scatter(150, (x, z, h) => {
+  const palmSpots = scatter(500 * Q, (x, z, h) => {
     const cc = coast(x, z); if (cc < 0.03 || cc > 0.14 || h < 4 || !clearOf(x, z, -10) || pathEdgeDist(x, z) < 6) return 0;
     const nearLagoon = Math.hypot(x - LAGOON[0], z - LAGOON[1]) < 420 ? 1 : 0.35;
     return nearLagoon * (cc < 0.1 ? 0.9 : 0.3);
@@ -184,7 +190,7 @@ export function buildFoliage(scene: THREE.Scene) {
     update(camPos: THREE.Vector3, time: number) {
       wind.time.value = time;
       for (const m of grassChunks) {
-        const b = m.boundingSphere!; m.visible = Math.hypot(b.center.x - camPos.x, b.center.z - camPos.z) < 950 + b.radius;
+        const b = m.boundingSphere!; m.visible = Math.hypot(b.center.x - camPos.x, b.center.z - camPos.z) < 3000 + b.radius;
       }
     },
   };
