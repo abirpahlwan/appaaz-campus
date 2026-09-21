@@ -1,7 +1,7 @@
 /* Campus scene (preview). Enabled with ?scene=campus while the new world is being built.
    Reuses the sky, ocean, post-processing, look and quality systems. */
 import * as THREE from 'three';
-import { $S } from '../core/state';
+import { $S, $R } from '../core/state';
 import { keys, P } from '../entities/player';
 import { LOOK, sunDirection } from '../render/look';
 import { createSky } from '../render/sky';
@@ -67,16 +67,38 @@ export function startCampus() {
   const hemi = new THREE.HemisphereLight(LOOK.hemiSky, LOOK.hemiGround, LOOK.hemiIntensity); scene.add(hemi);
 
   const hero = buildHero(); scene.add(hero.group);
-  const pl = { x: SPAWN[0], z: SPAWN[1], alt: 0, vy: 0, yaw: 0, face: Math.PI, moving: false, flying: false };
+  const pl = { x: SPAWN[0], z: SPAWN[1], alt: 0, vy: 0, yaw: 0, face: Math.PI, moving: false, flying: false, hover: false, groundY: 0 };
   const camS = new THREE.Vector3(pl.x, heightAt(pl.x, pl.z), pl.z);
   let yaw = 0;
 
-  /* mouse: drag to orbit, wheel to zoom */
+  /* mouse: drag to orbit, wheel to zoom. Touch is handled separately:
+     hud-controls turns any non-stick touch into $S.touchLook deltas and
+     two fingers into a pinch-zoom, so the stick and orbit can coexist. */
+  const coarse = matchMedia('(pointer:coarse)').matches;
+  const fb = document.getElementById('flypad'); if (fb) fb.style.display = coarse ? 'flex' : 'none';   // jetpad buttons, campus edition
   let drag = false, lx = 0;
-  cv.addEventListener('pointerdown', e => { drag = true; lx = e.clientX; cv.setPointerCapture(e.pointerId); });
-  addEventListener('pointerup', () => { drag = false; });
-  addEventListener('pointermove', e => { if (drag) { yaw -= (e.clientX - lx) * 0.006; lx = e.clientX; } });
-  cv.addEventListener('wheel', e => { $S.camDist = Math.min(1600, Math.max(120, $S.camDist * (1 + Math.sign(e.deltaY) * 0.08))); const el = document.getElementById('camDist') as HTMLInputElement; if (el) { el.value = String($S.camDist); const v = document.getElementById('camDistVal'); if (v) v.textContent = String(Math.round($S.camDist)); } }, { passive: true });
+  cv.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') return; drag = true; lx = e.clientX; cv.setPointerCapture(e.pointerId); });
+  addEventListener('pointerup', e => { if (e.pointerType !== 'touch') drag = false; });
+  addEventListener('pointermove', e => { if (drag && e.pointerType !== 'touch') { yaw -= (e.clientX - lx) * 0.006; lx = e.clientX; } });
+  let pinch = null;
+  cv.addEventListener('touchstart', e => {
+    if (e.touches.length === 2) {
+      pinch = { d: Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY), dist: $S.camDist };
+      $R.endTouchControls && $R.endTouchControls();        // zoom, don't steer
+    }
+  }, { passive: true });
+  cv.addEventListener('touchmove', e => {
+    if (pinch && e.touches.length === 2) {
+      const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      $S.camDist = Math.min(1600, Math.max(120, pinch.dist * pinch.d / Math.max(1, d)));
+      syncCamDistUi();
+    }
+  }, { passive: true });
+  cv.addEventListener('touchend', () => { pinch = null; }, { passive: true });
+  cv.addEventListener('wheel', e => { $S.camDist = Math.min(1600, Math.max(120, $S.camDist * (1 + Math.sign(e.deltaY) * 0.08))); syncCamDistUi(); }, { passive: true });
+  function syncCamDistUi() {
+    const el = document.getElementById('camDist') as HTMLInputElement; if (el) { el.value = String($S.camDist); const v = document.getElementById('camDistVal'); if (v) v.textContent = String(Math.round($S.camDist)); }
+  }
 
   const post = createPost(renderer, scene, cam);
   function size() { post.resize(innerWidth, innerHeight); cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); }
@@ -95,21 +117,29 @@ export function startCampus() {
     requestAnimationFrame(frame);
     const dtMs = now - last; last = now; const dt = Math.min(0.05, dtMs / 1000), t = now / 1000;
 
-    /* --- movement (relative to the camera) --- */
+    /* --- movement (relative to the camera) ---
+       Keyboard gives unit steps; the touch stick gives an analog vector
+       (x right, y down in screen space). Both are rotated by the camera
+       yaw, so stick-up always walks away from the camera. */
     const fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = Math.cos(yaw), rz = -Math.sin(yaw);
     let mx = 0, mz = 0;
-    if (key('w') || key('arrowup')) { mx += fx; mz += fz; }
-    if (key('s') || key('arrowdown')) { mx -= fx; mz -= fz; }
+    if (key('w') || key('arrowup'))    { mx += fx; mz += fz; }
+    if (key('s') || key('arrowdown'))  { mx -= fx; mz -= fz; }
     if (key('d') || key('arrowright')) { mx += rx; mz += rz; }
-    if (key('a') || key('arrowleft')) { mx -= rx; mz -= rz; }
-    const len = Math.hypot(mx, mz); pl.moving = len > 0;
+    if (key('a') || key('arrowleft'))  { mx -= rx; mz -= rz; }
+    const tv = $S.touchVec || { x: 0, y: 0 };                            // stick: screen-space analog vector
+    mx += tv.x * rx - tv.y * fx;
+    mz += tv.x * rz - tv.y * fz;
+    if (coarse) { yaw -= $S.touchLook.x * 0.006; $S.touchLook.x = 0; }   // consume orbit deltas so they never pile up
+    const len = Math.hypot(mx, mz); pl.moving = len > 0.08;
     const introOn = (document.getElementById('intro') as HTMLElement).style.display !== 'none';
     const modalOn = document.getElementById('modal')!.classList.contains('on');
     if (introOn || modalOn) { mx = 0; mz = 0; pl.moving = false; }
     const ground = groundAt(pl.x, pl.z);
     if (Math.hypot(mx, mz) > 0) {
+      const mag = Math.min(1, len);                                      // analog magnitude (keyboard is already unit)
       const sp = 95 * (P.speed || 1.5) / 1.5 * (pl.alt > ground + 3 ? 1.6 : 1) * dt;
-      const nx = pl.x + (mx / len) * sp, nz = pl.z + (mz / len) * sp, nh = groundAt(nx, nz);
+      const nx = pl.x + (mx / len) * sp * mag, nz = pl.z + (mz / len) * sp * mag, nh = groundAt(nx, nz);
       if (nh > 0.8 || pl.alt > nh + 4) { pl.x = nx; pl.z = nz; }          // no wading into the sea unless flying
       pl.face = Math.atan2(mx, mz);
     }
@@ -117,11 +147,16 @@ export function startCampus() {
       const dx = pl.x - cx, dz = pl.z - cz, d = Math.hypot(dx, dz), lim = cr + 8;
       if (d < lim && pl.alt < heightAt(cx, cz) + ch) { const k = lim / (d || 1); pl.x = cx + dx * k; pl.z = cz + dz * k; }
     }
+    /* --- altitude: hold = jetpack; releasing mid-air hovers in place --- */
     const fly = (key(' ') || key('z')) && !introOn && !modalOn, down = fly && key('shift');
-    const g0 = groundAt(pl.x, pl.z); pl.flying = fly && !down;
-    if (pl.flying) pl.vy = Math.min(190, pl.vy + 300 * dt); else if (down) pl.vy = Math.max(-140, pl.vy - 260 * dt); else pl.vy = Math.max(-160, pl.vy - 230 * dt);
-    pl.alt = Math.min(900, Math.max(g0, (pl.alt || g0) + pl.vy * dt)); if (pl.alt <= g0) { pl.alt = g0; pl.vy = Math.max(0, pl.vy); }
-    hero.group.position.set(pl.x, pl.alt, pl.z);
+    const g0 = groundAt(pl.x, pl.z); pl.groundY = g0; pl.flying = fly ? !down : pl.alt > g0 + 0.5;
+    if (fly && !down) { pl.vy = Math.min(190, pl.vy + 300 * dt); pl.hover = true; }
+    else if (down) { pl.vy = Math.max(-140, pl.vy - 260 * dt); pl.hover = true; }
+    else if (pl.hover) pl.vy = pl.alt - g0 < 1 ? -10 : 0;   // hover: hold altitude (settle the last inch)
+    else pl.vy = Math.max(-160, pl.vy - 230 * dt);          // walked off an edge: normal fall
+    pl.alt = Math.min(900, Math.max(g0, (pl.alt || g0) + pl.vy * dt));
+    if (pl.alt <= g0) { pl.alt = g0; pl.vy = 0; pl.hover = false; }
+    hero.group.position.set(pl.x, pl.alt + (pl.hover ? Math.sin(t * 1.7) * 2.2 : 0), pl.z);
     hero.group.rotation.y = pl.face;
     hero.animate(t, pl.moving && pl.alt <= g0 + 1, pl.flying, P.speed || 1.5);
 

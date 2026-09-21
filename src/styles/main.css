@@ -34,6 +34,9 @@
   .badge b{color:#c8541f}
   .badge #found{color:#6b5a4a !important}
   .hud-left{display:flex; flex-direction:column; gap:8px; pointer-events:auto}
+  #hudToggle{align-self:flex-start}
+  #hud.min .hud-left .badge{display:none}
+  #hud.min .hud-btns{display:none}
   .badge.speed{padding:8px 11px}
   .badge.speed label{display:block; font-size:11px; margin-bottom:6px; color:#6b5a4a; cursor:pointer}
   .badge.speed label b{color:#c8541f}
@@ -92,23 +95,27 @@
            box-shadow:0 3px 0 #33241c;}
 
   #touch{position:absolute; inset:0; display:none; pointer-events:none}
-  #stick{position:absolute; left:26px; bottom:26px; width:124px; height:124px;
+  #stick{position:absolute; left:50%; transform:translateX(-50%); bottom:26px; width:124px; height:124px;
          border:4px solid rgba(51,36,28,.75); border-radius:50%;
-         background:rgba(255,246,226,.45); pointer-events:auto;
+         background:rgba(255,246,226,.45); pointer-events:auto; touch-action:none;
          transition:opacity .18s ease; opacity:.55;}
   #stick.live{opacity:1}
   #nub{position:absolute; left:50%; top:50%; width:52px; height:52px; margin:-26px 0 0 -26px;
        border-radius:50%; background:#fff6e2; border:4px solid #33241c;}
-  #abtn{position:absolute; right:30px; bottom:44px; width:84px; height:84px; border-radius:50%;
+  #abtn{position:absolute; right:30px; bottom:44px; width:64px; height:64px; border-radius:50%;
         background:#ffd23f; border:4px solid #33241c; color:#33241c; font-weight:700;
-        box-shadow:0 4px 0 #33241c; font-family:var(--font); font-size:15px; pointer-events:auto;
+        box-shadow:0 4px 0 #33241c; font-family:var(--font); font-size:12.5px; pointer-events:auto;
         background-image:var(--glass-shine); cursor:pointer;}
   #abtn:focus-visible{outline:2px solid #c8541f; outline-offset:3px}
-  #flybtn{position:absolute; left:30px; bottom:44px; width:84px; height:84px; border-radius:50%;
-        background:#4ade80; border:4px solid #33241c; color:#064E3B; font-weight:700;
-        box-shadow:0 4px 0 #33241c; font-family:var(--font); font-size:15px; pointer-events:auto;
-        background-image:var(--glass-shine); cursor:pointer; display:none; touch-action:none;}
-  #flybtn:focus-visible{outline:2px solid #c8541f; outline-offset:3px}
+  #flypad{position:absolute; left:30px; bottom:44px; display:flex; flex-direction:column; gap:10px; pointer-events:none;}
+  #flyup, #flydown{width:68px; height:68px; border-radius:50%; pointer-events:auto;
+        font-family:var(--font); font-size:20px; font-weight:700; cursor:pointer; touch-action:none;
+        border:4px solid #33241c; box-shadow:0 4px 0 #33241c;}
+  #flyup{background:#4ade80; color:#064E3B;}
+  #flydown{background:#60a5fa; color:#0c2a4d;}
+  #flyup:focus-visible, #flydown:focus-visible{outline:2px solid #c8541f; outline-offset:3px}
+  #flyup.active, #flydown.active{filter:brightness(1.18);
+        box-shadow:0 4px 0 #33241c, 0 0 20px rgba(74,222,128,.7);}
 
   #modal{position:fixed; inset:0; z-index:20; display:none; touch-action:pan-y; -webkit-overflow-scrolling:touch; background:rgba(5,8,12,.74);
          padding:20px; overflow:auto; -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);}

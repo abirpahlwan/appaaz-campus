@@ -23,6 +23,7 @@
 <div id="hud">
   <div class="hud-top">
     <div class="hud-left">
+      <button class="k" id="hudToggle" aria-expanded="true" title="Show or hide the HUD panels">▴ HUD</button>
       <div class="badge">
         <div><b id="whoami">—</b></div>
         <div id="found" style="color:var(--ink-dim)">Discovered 0 / 0</div>
@@ -61,7 +62,10 @@
   <div id="touch">
     <div id="stick"><div id="nub"></div></div>
     <button id="abtn">LOOK</button>
-      <button id="flybtn">FLY</button>
+    <div id="flypad">
+      <button id="flyup" aria-label="Hold to ascend">▲</button>
+      <button id="flydown" aria-label="Hold to descend">▼</button>
+    </div>
   </div>
 </div>
 

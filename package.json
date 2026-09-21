@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "portless": "portless appaaz vite dev",
+    "portless": "portless appaaz vite dev --host",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },

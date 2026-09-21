@@ -155,7 +155,7 @@ function flip3d(){
   $S.R3on=true;
   document.getElementById('game3d').style.display='block';
   document.getElementById('game').style.display='none';
-  document.getElementById('flybtn').style.display=(matchMedia('(pointer:coarse)').matches)?'block':'none';
+  const fp=document.getElementById('flypad'); if(fp) fp.style.display=(matchMedia('(pointer:coarse)').matches)?'block':'none';
   if(P.alt===undefined){ P.alt=0; P.vy=0; }
   if($S.riding) dismount();
   $R.toast('WASD / stick to move \u00b7 hold SPACE / FLY for jetpack \u00b7 E interacts');
@@ -187,9 +187,12 @@ document.getElementById('camDist').oninput=e=>{
   $S.camDist=+e.target.value;
   document.getElementById('camDistVal').textContent=$S.camDist;
 };
-const flyBtn=document.getElementById('flybtn');
+const flypad=document.getElementById('flypad');
 let flyHeld=false;
-flyBtn.addEventListener('pointerdown', e=>{ e.preventDefault(); flyHeld=true; keys['z']=true; });
+if(flypad) flypad.addEventListener('pointerdown', e=>{
+  if(e.pointerType==='touch') return;                 // touch already handled by hud-controls FLY logic
+  e.preventDefault(); flyHeld=true; keys['z']=true;
+});
 addEventListener('pointerup', ()=>{ if(flyHeld){ flyHeld=false; keys['z']=false; } });
 
 export function loop(){
